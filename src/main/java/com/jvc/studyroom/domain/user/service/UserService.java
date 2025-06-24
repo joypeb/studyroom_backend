@@ -1,7 +1,7 @@
 package com.jvc.studyroom.domain.user.service;
 
-import com.jvc.studyroom.domain.user.controller.dto.UserRequest;
-import com.jvc.studyroom.domain.user.controller.dto.UserResponse;
+import com.jvc.studyroom.domain.user.dto.UserRequest;
+import com.jvc.studyroom.domain.user.dto.UserResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

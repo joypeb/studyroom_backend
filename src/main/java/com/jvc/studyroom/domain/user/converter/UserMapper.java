@@ -1,7 +1,7 @@
 package com.jvc.studyroom.domain.user.converter;
 
-import com.jvc.studyroom.domain.user.controller.dto.UserRequest;
-import com.jvc.studyroom.domain.user.controller.dto.UserResponse;
+import com.jvc.studyroom.domain.user.dto.UserRequest;
+import com.jvc.studyroom.domain.user.dto.UserResponse;
 import com.jvc.studyroom.domain.user.model.User;
 
 public class UserMapper {

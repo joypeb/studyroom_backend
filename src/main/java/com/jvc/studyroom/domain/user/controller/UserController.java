@@ -1,8 +1,7 @@
 package com.jvc.studyroom.domain.user.controller;
-import com.jvc.studyroom.domain.user.controller.dto.UserRequest;
-import com.jvc.studyroom.domain.user.controller.dto.UserResponse;
+import com.jvc.studyroom.domain.user.dto.UserRequest;
+import com.jvc.studyroom.domain.user.dto.UserResponse;
 import com.jvc.studyroom.domain.user.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

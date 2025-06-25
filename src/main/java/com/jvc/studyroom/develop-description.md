@@ -26,3 +26,4 @@
 - service, repository 계층은 인터페이스랑 구현체 나눠주세요 (아래는 네이밍 추천)
   - LoginService (인터페이스) - LoginServiceImpl (구현체)
   - LoginService (인터페이스) - KaKaoLoginService (구현체)
+    - 해당 방식 추천 (https://www.baeldung.com/java-interface-naming-conventions)

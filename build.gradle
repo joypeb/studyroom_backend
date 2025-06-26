@@ -24,14 +24,23 @@ repositories {
 }
 
 dependencies {
+	// framework
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	// database
 	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
-	compileOnly 'org.projectlombok:lombok'
+	implementation("io.r2dbc:r2dbc-h2")
+	runtimeOnly("com.h2database:h2")
+	// develop
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	compileOnly 'org.projectlombok:lombok'
+	// could
 	testImplementation 'io.projectreactor:reactor-test'
+	// testcode
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
 }
 
 tasks.named('test') {

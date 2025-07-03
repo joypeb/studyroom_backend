@@ -1,9 +1,12 @@
 package com.jvc.studyroom.domain.user.repository;
 
 import com.jvc.studyroom.domain.user.model.User;
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import java.util.UUID;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-public interface UserRepository extends ReactiveCrudRepository<User, Long> {
-    Flux<User> findByName(String name);
+public interface UserRepository extends R2dbcRepository<User, UUID> {
+    Flux<User> findAllByDeletedAtIsNull();
+    Mono<User> findByUserIdAndDeletedAtIsNull(UUID userId);
 }

@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
 @Service
 public class KakaoLoginService implements LoginService {
 
-    private String clientId;
+    private final String clientId;
     private final String KAUTH_TOKEN_URL_HOST;
     private final String KAUTH_USER_URL_HOST;
 

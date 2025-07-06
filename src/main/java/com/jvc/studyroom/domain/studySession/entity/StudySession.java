@@ -1,4 +1,4 @@
-package com.jvc.studyroom.domain.studySession.Entity;
+package com.jvc.studyroom.domain.studySession.entity;
 
 import lombok.Getter;
 import lombok.Setter;

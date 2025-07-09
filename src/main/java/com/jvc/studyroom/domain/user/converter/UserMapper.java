@@ -11,6 +11,8 @@ public class UserMapper {
                 user.getName(),
                 user.getPhoneNumber(),
                 user.getAccountStatus().name(),
+                user.getRole(),
+                user.getAssignedSeatId(),
                 user.getLastLoginAt(),
                 user.getCreatedAt());
     }

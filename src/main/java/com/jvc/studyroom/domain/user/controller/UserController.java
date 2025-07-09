@@ -1,6 +1,8 @@
 package com.jvc.studyroom.domain.user.controller;
+import com.jvc.studyroom.common.dto.PaginationRequest;
 import com.jvc.studyroom.common.utils.PageableUtil;
 import com.jvc.studyroom.domain.user.dto.UserResponse;
+import com.jvc.studyroom.domain.user.dto.UserRoleRequest;
 import com.jvc.studyroom.domain.user.service.UserService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +20,8 @@ public class UserController {
     private final PageableUtil pageableUtil;
 
     @GetMapping
-    public Mono<Page<UserResponse>> getAllUsers(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "userId") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDirection) {
-        Pageable pageable = pageableUtil.createPageable(page, size, sortBy, sortDirection);
-        return userService.findAllUsers(pageable);
+    public Mono<Page<UserResponse>> getAllUsers(@RequestBody PaginationRequest request) {
+        return userService.findAllUsers(request);
     }
 
     @GetMapping("/{userId}")
@@ -32,13 +29,8 @@ public class UserController {
         return userService.findUserById(userId);
     }
 
-    @GetMapping("/role/{role}")
-    public Mono<Page<UserResponse>> getAllUsersByRole(@PathVariable String role,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "userId") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDirection) {
-        Pageable pageable = pageableUtil.createPageable(page, size, sortBy, sortDirection);
-        return userService.findAllUsersByRole(role, pageable);
+    @GetMapping("/role")
+    public Mono<Page<UserResponse>> getAllUsersByRole(@RequestBody UserRoleRequest request) {
+        return userService.findAllUsersByRole(request);
     }
 }

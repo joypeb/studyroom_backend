@@ -1,9 +1,11 @@
 package com.jvc.studyroom.domain.user.service;
 
+import com.jvc.studyroom.common.dto.PaginationRequest;
 import com.jvc.studyroom.common.enums.UserRole;
 import com.jvc.studyroom.common.utils.PageableUtil;
 import com.jvc.studyroom.domain.user.converter.UserMapper;
 import com.jvc.studyroom.domain.user.dto.UserResponse;
+import com.jvc.studyroom.domain.user.dto.UserRoleRequest;
 import com.jvc.studyroom.domain.user.repository.UserRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +23,9 @@ public class DefaultUserService implements UserService {
     private final PageableUtil pageableUtil;
 
     @Override
-    public Mono<Page<UserResponse>> findAllUsers(Pageable pageable) {
+    public Mono<Page<UserResponse>> findAllUsers(PaginationRequest request) {
+        Pageable pageable = createPageable(request.getPage(), request.getSize(), request.getSortBy(), request.getSortDirection());
+
         Flux<UserResponse> user = userRepository.findAllByDeletedAtIsNull(pageable).map(UserMapper::toUserResponse);
         Mono<Long> count = userRepository.countByDeletedAtIsNull();
 
@@ -34,11 +38,17 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public Mono<Page<UserResponse>> findAllUsersByRole(String role, Pageable pageable) {
-        Flux<UserResponse> user = userRepository.findAllByRoleAndDeletedAtIsNull(UserRole.fromString(role), pageable).map(UserMapper::toUserResponse);
-        Mono<Long> count = userRepository.countByRoleAndDeletedAtIsNull(UserRole.fromString(role));
+    public Mono<Page<UserResponse>> findAllUsersByRole(UserRoleRequest request) {
+        Pageable pageable = createPageable(request.getPage(), request.getSize(), request.getSortBy(), request.getSortDirection());
+
+        Flux<UserResponse> user = userRepository.findAllByRoleAndDeletedAtIsNull(UserRole.fromString(request.getRole().toUpperCase()), pageable)
+                .map(UserMapper::toUserResponse);
+        Mono<Long> count = userRepository.countByRoleAndDeletedAtIsNull(UserRole.fromString(request.getRole()));
 
         return pageableUtil.createPageResponse(user, count, pageable);
     }
 
+    private Pageable createPageable(Integer page, Integer size, String sortBy, String sortDirection) {
+        return pageableUtil.createPageable(page, size, sortBy, sortDirection);
+    }
 }

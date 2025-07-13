@@ -1,11 +1,13 @@
 package com.jvc.studyroom.domain.user.service;
 
 import com.jvc.studyroom.common.dto.PaginationRequest;
+import com.jvc.studyroom.common.enums.AccountStatus;
 import com.jvc.studyroom.common.enums.UserRole;
 import com.jvc.studyroom.common.utils.PageableUtil;
 import com.jvc.studyroom.domain.user.converter.UserMapper;
 import com.jvc.studyroom.domain.user.dto.UserResponse;
 import com.jvc.studyroom.domain.user.dto.UserRoleRequest;
+import com.jvc.studyroom.domain.user.dto.UserStatusRequest;
 import com.jvc.studyroom.domain.user.repository.UserRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -22,30 +24,37 @@ public class DefaultUserService implements UserService {
     private final UserRepository userRepository;
     private final PageableUtil pageableUtil;
 
+    private final static AccountStatus STATUS_ACTIVE = AccountStatus.ACTIVE;
+
     @Override
     public Mono<Page<UserResponse>> findAllUsers(PaginationRequest request) {
         Pageable pageable = createPageable(request.getPage(), request.getSize(), request.getSortBy(), request.getSortDirection());
 
-        Flux<UserResponse> user = userRepository.findAllByDeletedAtIsNull(pageable).map(UserMapper::toUserResponse);
-        Mono<Long> count = userRepository.countByDeletedAtIsNull();
+        Flux<UserResponse> user = userRepository.findAllByAccountStatus(pageable, STATUS_ACTIVE).map(UserMapper::toUserResponse);
+        Mono<Long> count = userRepository.countByAccountStatus(STATUS_ACTIVE);
 
         return pageableUtil.createPageResponse(user, count, pageable);
     }
 
     @Override
     public Mono<UserResponse> findUserById(UUID userId) {
-        return userRepository.findByUserIdAndDeletedAtIsNull(userId).map(UserMapper::toUserResponse);
+        return userRepository.findByUserIdAndAccountStatus(userId, STATUS_ACTIVE).map(UserMapper::toUserResponse);
     }
 
     @Override
     public Mono<Page<UserResponse>> findAllUsersByRole(UserRoleRequest request) {
         Pageable pageable = createPageable(request.getPage(), request.getSize(), request.getSortBy(), request.getSortDirection());
 
-        Flux<UserResponse> user = userRepository.findAllByRoleAndDeletedAtIsNull(UserRole.fromString(request.getRole().toUpperCase()), pageable)
+        Flux<UserResponse> user = userRepository.findAllByRoleAndAccountStatus(UserRole.fromString(request.getRole().toUpperCase()), pageable, STATUS_ACTIVE)
                 .map(UserMapper::toUserResponse);
-        Mono<Long> count = userRepository.countByRoleAndDeletedAtIsNull(UserRole.fromString(request.getRole()));
+        Mono<Long> count = userRepository.countByRoleAndAccountStatus(UserRole.fromString(request.getRole()), STATUS_ACTIVE);
 
         return pageableUtil.createPageResponse(user, count, pageable);
+    }
+
+    @Override
+    public Mono<Integer> updateUserStatusById(UUID userId, UserStatusRequest request) {
+        return userRepository.updateAccountStatus(userId, request.getAccountStatus());
     }
 
     private Pageable createPageable(Integer page, Integer size, String sortBy, String sortDirection) {

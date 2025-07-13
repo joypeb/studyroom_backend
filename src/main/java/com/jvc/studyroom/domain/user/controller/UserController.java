@@ -3,6 +3,7 @@ import com.jvc.studyroom.common.dto.PaginationRequest;
 import com.jvc.studyroom.common.utils.PageableUtil;
 import com.jvc.studyroom.domain.user.dto.UserResponse;
 import com.jvc.studyroom.domain.user.dto.UserRoleRequest;
+import com.jvc.studyroom.domain.user.dto.UserStatusRequest;
 import com.jvc.studyroom.domain.user.service.UserService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -32,5 +33,10 @@ public class UserController {
     @GetMapping("/role")
     public Mono<Page<UserResponse>> getAllUsersByRole(@RequestBody UserRoleRequest request) {
         return userService.findAllUsersByRole(request);
+    }
+
+    @PutMapping("/{userId}")
+    public Mono<Integer> updateUserStatusById(@PathVariable UUID userId,@RequestBody UserStatusRequest request) {
+        return userService.updateUserStatusById(userId, request);
     }
 }

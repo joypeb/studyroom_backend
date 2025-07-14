@@ -23,4 +23,5 @@ public interface UserRepository extends R2dbcRepository<User, UUID> {
     Mono<Integer> updateAccountStatus(@Param("userId") UUID userId, @Param("accountStatus") AccountStatus accountStatus);
     @Query("UPDATE users SET assigned_seat_id = :seatId, updated_at = NOW() WHERE user_id = :userId")
     Mono<Integer> updateAssignedSeatId(@Param("userId") UUID userId, @Param("seatId") UUID seatId);
+    Mono<User> findUserByAssignedSeatId(UUID seatId);
 }

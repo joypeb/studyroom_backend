@@ -48,4 +48,10 @@ public interface SeatRepository extends R2dbcRepository<Seat, UUID> {
             @Param("assignedBy") UUID assignedBy,
             @Param("seatStatus") SeatStatus seatStatus
     );
+
+    Mono<Void> deleteSeatBySeatId(UUID seatId);
+
+    @Query("UPDATE seats SET is_active = false, updated_at = now() WHERE seat_id = :seatId")
+    Mono<Void> updateIsActiveBySeatId(@Param("seatId") UUID seatId);
+
 }

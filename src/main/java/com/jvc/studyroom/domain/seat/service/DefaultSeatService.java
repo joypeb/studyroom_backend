@@ -69,6 +69,13 @@ public class DefaultSeatService implements SeatService {
                         seatId, request.studentId(), request.studentId(), SeatStatus.OCCUPIED));
     }
 
+    @Override
+    public Mono<Void> deleteSeatById(UUID seatId) {
+        return userRepository.findUserByAssignedSeatId(seatId)
+                .flatMap(user -> userRepository.updateAssignedSeatId(user.getUserId(), null))
+                .then(seatRepository.updateIsActiveBySeatId(seatId));
+    }
+
     private Pageable createPageable(Integer page, Integer size, String sortBy, String sortDirection) {
         return pageableUtil.createPageable(page, size, sortBy, sortDirection);
     }

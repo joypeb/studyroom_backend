@@ -14,4 +14,5 @@ public interface SeatService {
     Mono<SeatDetailResponse> findSeatById(UUID seatId);
     Mono<Void> createSeat(SeatRequest request);
     Mono<Integer> updateAssignedStudentSeatById(UUID seatId, AssignedStudentSeatRequest request);
+    Mono<Void> deleteSeatById(UUID seatId);
 }

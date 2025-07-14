@@ -4,10 +4,12 @@ import com.jvc.studyroom.common.dto.PaginationRequest;
 import com.jvc.studyroom.common.utils.PageableUtil;
 import com.jvc.studyroom.domain.seat.converter.SeatMapper;
 import com.jvc.studyroom.domain.seat.dto.SeatDetailResponse;
+import com.jvc.studyroom.domain.seat.dto.SeatRequest;
 import com.jvc.studyroom.domain.seat.dto.SeatResponse;
 import com.jvc.studyroom.domain.seat.repository.SeatRepository;
 import com.jvc.studyroom.domain.user.converter.UserMapper;
 import com.jvc.studyroom.domain.user.dto.UserResponse;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,6 +38,13 @@ public class DefaultSeatService implements SeatService{
     @Override
     public Mono<SeatDetailResponse> findSeatById(UUID seatId) {
         return seatRepository.findSeatBySeatId(seatId).map(SeatMapper::toSeatDetailResponse);
+    }
+
+    @Override
+    public Mono<Void> createSeat(SeatRequest request) {
+        UUID seatId = UUID.randomUUID();
+        OffsetDateTime now = OffsetDateTime.now();
+        return seatRepository.createSeat(SeatMapper.toSeat(request, now, seatId));
     }
 
     private Pageable createPageable(Integer page, Integer size, String sortBy, String sortDirection) {

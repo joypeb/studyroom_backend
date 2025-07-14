@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -15,6 +16,8 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table("seats")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Seat {
     @Id
     private UUID seatId;

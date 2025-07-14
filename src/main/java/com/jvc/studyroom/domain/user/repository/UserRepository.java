@@ -3,6 +3,7 @@ package com.jvc.studyroom.domain.user.repository;
 import com.jvc.studyroom.common.enums.AccountStatus;
 import com.jvc.studyroom.common.enums.UserRole;
 import com.jvc.studyroom.domain.user.model.User;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.r2dbc.repository.Query;
@@ -20,5 +21,6 @@ public interface UserRepository extends R2dbcRepository<User, UUID> {
     Mono<Long> countByAccountStatus(AccountStatus accountStatus);
     @Query("UPDATE users SET account_status = :accountStatus, updated_at = NOW() WHERE user_id = :userId")
     Mono<Integer> updateAccountStatus(@Param("userId") UUID userId, @Param("accountStatus") AccountStatus accountStatus);
-
+    @Query("UPDATE users SET assigned_seat_id = :seatId, updated_at = NOW() WHERE user_id = :userId")
+    Mono<Integer> updateAssignedSeatId(@Param("userId") UUID userId, @Param("seatId") UUID seatId);
 }

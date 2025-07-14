@@ -1,6 +1,7 @@
 package com.jvc.studyroom.domain.seat.service;
 
 import com.jvc.studyroom.common.dto.PaginationRequest;
+import com.jvc.studyroom.domain.seat.dto.AssignedStudentSeatRequest;
 import com.jvc.studyroom.domain.seat.dto.SeatDetailResponse;
 import com.jvc.studyroom.domain.seat.dto.SeatRequest;
 import com.jvc.studyroom.domain.seat.dto.SeatResponse;
@@ -12,4 +13,5 @@ public interface SeatService {
     Mono<Page<SeatResponse>> findAllSeats(PaginationRequest request);
     Mono<SeatDetailResponse> findSeatById(UUID seatId);
     Mono<Void> createSeat(SeatRequest request);
+    Mono<Integer> updateAssignedStudentSeatById(UUID seatId, AssignedStudentSeatRequest request);
 }

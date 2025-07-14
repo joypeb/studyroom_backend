@@ -35,8 +35,8 @@ public class UserController {
         return userService.findAllUsersByRole(request);
     }
 
-    @PutMapping("/{userId}")
-    public Mono<Integer> updateUserStatusById(@PathVariable UUID userId,@RequestBody UserStatusRequest request) {
+    @PutMapping("/{userId}/status")
+    public Mono<Integer> updateUserStatusById(@PathVariable UUID userId, @RequestBody UserStatusRequest request) {
         return userService.updateUserStatusById(userId, request);
     }
 }

@@ -1,5 +1,6 @@
 package com.jvc.studyroom.domain.seat.converter;
 
+import com.jvc.studyroom.domain.seat.dto.AssignedStudentSeatRequest;
 import com.jvc.studyroom.domain.seat.dto.SeatDetailResponse;
 import com.jvc.studyroom.domain.seat.dto.SeatRequest;
 import com.jvc.studyroom.domain.seat.dto.SeatResponse;
@@ -43,7 +44,7 @@ public class SeatMapper {
         );
     }
 
-    public static Seat toSeat(SeatRequest request, OffsetDateTime now, UUID seatId) {
+    public static Seat toSeat(SeatRequest request, UUID seatId) {
         return Seat.builder()
                 .seatId(seatId)
                 .seatNumber(request.seatNumber())
@@ -60,8 +61,15 @@ public class SeatMapper {
                 .assignedAt(null)
                 .assignedBy(null)
                 .isActive(request.isActive())
-                .createdAt(now)
-                .updatedAt(now)
+                .build();
+    }
+
+    public static Seat assignStudentToSeat(UUID seatId, AssignedStudentSeatRequest request, OffsetDateTime now, UUID assignedBy) {
+        return Seat.builder()
+                .seatId(seatId)
+                .assignedStudentId(request.studentId())
+                .assignedAt(now)
+                .assignedBy(assignedBy)
                 .build();
     }
 }

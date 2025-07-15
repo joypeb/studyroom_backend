@@ -64,6 +64,25 @@ public class SeatMapper {
                 .build();
     }
 
+    public static Seat toSeat(SeatRequest request) {
+        return Seat.builder()
+                .seatNumber(request.seatNumber())
+                .roomName(request.roomName())
+                .positionX(request.positionX())
+                .positionY(request.positionY())
+                .rotation(request.rotation())
+                .seatStatus(request.seatStatus())
+                .hasPowerOutlet(request.hasPowerOutlet())
+                .hasDeskLamp(request.hasDeskLamp())
+                .hasLocker(request.hasLocker())
+                .isNearWindow(request.isNearWindow())
+                .assignedStudentId(null)
+                .assignedAt(null)
+                .assignedBy(null)
+                .isActive(request.isActive())
+                .build();
+    }
+
     public static Seat assignStudentToSeat(UUID seatId, AssignedStudentSeatRequest request, OffsetDateTime now, UUID assignedBy) {
         return Seat.builder()
                 .seatId(seatId)

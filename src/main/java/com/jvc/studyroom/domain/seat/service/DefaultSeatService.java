@@ -50,8 +50,14 @@ public class DefaultSeatService implements SeatService {
 
     @Override
     public Mono<Void> createSeat(SeatRequest request) {
-        UUID seatId = UUID.randomUUID();
-        return seatRepository.createSeat(SeatMapper.toSeat(request, seatId));
+        return seatRepository.existsBySeatNumberAndRoomName(request.seatNumber(), request.roomName())
+            .flatMap(exists -> {
+                if (exists) {
+                    return Mono.error(new Exception("해당 좌석이 이미 존재합니다"));
+                }
+                return seatRepository.save(SeatMapper.toSeat(request));
+            })
+            .then();
     }
 
     @Override

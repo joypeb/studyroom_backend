@@ -20,6 +20,8 @@ public interface SeatRepository extends R2dbcRepository<Seat, UUID> {
 
     Mono<Seat> findSeatBySeatId(UUID seatId);
 
+    Mono<Boolean> existsBySeatNumberAndRoomName(String seatNumber, String roomName);
+
     @Query("""
             INSERT INTO seats (
                 seat_id, seat_number, room_name, position_x, position_y, rotation,

@@ -32,6 +32,9 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	implementation 'io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE' // ← 이게 꼭 필요함!!
+	runtimeOnly 'org.postgresql:postgresql'    // ← R2DBC 초기화용 (JDBC 드라이버)
 }
 
 tasks.named('test') {

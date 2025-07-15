@@ -1,18 +1,48 @@
 package com.jvc.studyroom.domain.user.converter;
 
-import com.jvc.studyroom.domain.user.dto.UserRequest;
 import com.jvc.studyroom.domain.user.dto.UserResponse;
+import com.jvc.studyroom.domain.user.dto.UserUpdateRequest;
 import com.jvc.studyroom.domain.user.model.User;
 
 public class UserMapper {
-    public static User toEntity(UserRequest dto) {
-        User user = new User();
-        user.setName(dto.name());
-        user.setEmail(dto.email());
-        return user;
+    public static UserResponse toUserResponse(User user) {
+        return new UserResponse(
+                user.getUserId(),
+                user.getEmail(),
+                user.getName(),
+                user.getPhoneNumber(),
+                user.getAccountStatus().name(),
+                user.getRole(),
+                user.getAssignedSeatId(),
+                user.getLastLoginAt(),
+                user.getCreatedAt());
     }
 
-    public static UserResponse toDto(User user) {
-        return new UserResponse(user.getId(), user.getName(), user.getEmail());
+    public static User toUpdateUser(User user, UserUpdateRequest request) {
+        if (request.email() != null) {
+            user.setEmail(request.email());
+        }
+
+        if (request.name() != null) {
+            user.setName(request.name());
+        }
+
+        if (request.phoneNumber() != null) {
+            user.setPhoneNumber(request.phoneNumber());
+        }
+
+        if (request.accountStatus() != null) {
+            user.setAccountStatus(request.accountStatus());
+        }
+
+        if (request.role() != null) {
+            user.setRole(request.role());
+        }
+
+        if (request.assignedSeatId() != null) {
+            user.setAssignedSeatId(request.assignedSeatId());
+        }
+
+        return user;
     }
 }

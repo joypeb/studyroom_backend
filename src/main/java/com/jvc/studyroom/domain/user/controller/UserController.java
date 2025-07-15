@@ -4,11 +4,13 @@ import com.jvc.studyroom.common.utils.PageableUtil;
 import com.jvc.studyroom.domain.user.dto.UserResponse;
 import com.jvc.studyroom.domain.user.dto.UserRoleRequest;
 import com.jvc.studyroom.domain.user.dto.UserStatusRequest;
+import com.jvc.studyroom.domain.user.dto.UserUpdateRequest;
 import com.jvc.studyroom.domain.user.service.UserService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -18,7 +20,6 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
-    private final PageableUtil pageableUtil;
 
     @GetMapping
     public Mono<Page<UserResponse>> getAllUsers(@RequestBody PaginationRequest request) {
@@ -38,5 +39,10 @@ public class UserController {
     @PutMapping("/{userId}/status")
     public Mono<Integer> updateUserStatusById(@PathVariable UUID userId, @RequestBody UserStatusRequest request) {
         return userService.updateUserStatusById(userId, request);
+    }
+
+    @PutMapping("/{userId}")
+    public Mono<UserResponse> updateUser(@PathVariable UUID userId, @RequestBody UserUpdateRequest request) {
+        return userService.updateUser(userId, request);
     }
 }

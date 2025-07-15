@@ -3,7 +3,6 @@ package com.jvc.studyroom.domain.user.repository;
 import com.jvc.studyroom.common.enums.AccountStatus;
 import com.jvc.studyroom.common.enums.UserRole;
 import com.jvc.studyroom.domain.user.model.User;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.r2dbc.repository.Query;
@@ -14,7 +13,7 @@ import reactor.core.publisher.Mono;
 
 public interface UserRepository extends R2dbcRepository<User, UUID> {
     Flux<User> findAllByAccountStatus(Pageable pageable, AccountStatus accountStatus);
-    Mono<User> findByUserIdAndAccountStatus(UUID userId, AccountStatus accountStatus);
+    Mono<User> findByUserId(UUID userId);
     Flux<User> findAllByRoleAndAccountStatus(UserRole role, AccountStatus accountStatus);
     Flux<User> findAllByRoleAndAccountStatus(UserRole role, Pageable pageable, AccountStatus accountStatus);
     Mono<Long> countByRoleAndAccountStatus(UserRole role, AccountStatus accountStatus);
@@ -24,4 +23,6 @@ public interface UserRepository extends R2dbcRepository<User, UUID> {
     @Query("UPDATE users SET assigned_seat_id = :seatId, updated_at = NOW() WHERE user_id = :userId")
     Mono<Integer> updateAssignedSeatId(@Param("userId") UUID userId, @Param("seatId") UUID seatId);
     Mono<User> findUserByAssignedSeatId(UUID seatId);
+    Flux<User> findAllByAccountStatusNot(Pageable pageable, AccountStatus accountStatus);
+    Mono<Long> countByAccountStatusNot(AccountStatus accountStatus);
 }

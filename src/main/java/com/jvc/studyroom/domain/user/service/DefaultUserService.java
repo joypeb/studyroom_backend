@@ -8,11 +8,13 @@ import com.jvc.studyroom.domain.user.converter.UserMapper;
 import com.jvc.studyroom.domain.user.dto.UserResponse;
 import com.jvc.studyroom.domain.user.dto.UserRoleRequest;
 import com.jvc.studyroom.domain.user.dto.UserStatusRequest;
+import com.jvc.studyroom.domain.user.dto.UserUpdateRequest;
 import com.jvc.studyroom.domain.user.repository.UserRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,15 +32,15 @@ public class DefaultUserService implements UserService {
     public Mono<Page<UserResponse>> findAllUsers(PaginationRequest request) {
         Pageable pageable = createPageable(request.getPage(), request.getSize(), request.getSortBy(), request.getSortDirection());
 
-        Flux<UserResponse> user = userRepository.findAllByAccountStatus(pageable, STATUS_ACTIVE).map(UserMapper::toUserResponse);
-        Mono<Long> count = userRepository.countByAccountStatus(STATUS_ACTIVE);
+        Flux<UserResponse> user = userRepository.findAllByAccountStatusNot(pageable, AccountStatus.DELETED).map(UserMapper::toUserResponse);
+        Mono<Long> count = userRepository.countByAccountStatusNot(AccountStatus.DELETED);
 
         return pageableUtil.createPageResponse(user, count, pageable);
     }
 
     @Override
     public Mono<UserResponse> findUserById(UUID userId) {
-        return userRepository.findByUserIdAndAccountStatus(userId, STATUS_ACTIVE).map(UserMapper::toUserResponse);
+        return userRepository.findByUserId(userId).map(UserMapper::toUserResponse);
     }
 
     @Override
@@ -55,6 +57,15 @@ public class DefaultUserService implements UserService {
     @Override
     public Mono<Integer> updateUserStatusById(UUID userId, UserStatusRequest request) {
         return userRepository.updateAccountStatus(userId, request.getAccountStatus());
+    }
+
+    @Override
+    public Mono<UserResponse> updateUser(UUID userId, UserUpdateRequest request) {
+        return userRepository.findByUserId(userId)
+                .switchIfEmpty(Mono.error(new Exception("해당 사용자가 존재하지 않습니다")))
+                .filter(user -> user.getAccountStatus().equals(AccountStatus.ACTIVE))
+                .switchIfEmpty(Mono.error(new Exception("해당 사용자가 존재하지 않습니다")))
+                .flatMap(existingUser -> userRepository.save(UserMapper.toUpdateUser(existingUser, request)).map(UserMapper::toUserResponse));
     }
 
     private Pageable createPageable(Integer page, Integer size, String sortBy, String sortDirection) {

@@ -56,7 +56,9 @@ public class DefaultSeatService implements SeatService {
 
     @Override
     public Mono<Integer> updateAssignedStudentSeatById(UUID seatId, AssignedStudentSeatRequest request) {
-        return userRepository.findByUserIdAndAccountStatus(request.studentId(), AccountStatus.ACTIVE)
+        return userRepository.findByUserId(request.studentId())
+                .switchIfEmpty(Mono.error(new Exception("해당 사용자가 존재하지 않습니다")))
+                .filter(user -> user.getAccountStatus().equals(AccountStatus.ACTIVE))
                 .switchIfEmpty(Mono.error(new Exception("해당 사용자가 존재하지 않습니다")))
                 .filter(user -> user.getRole().equals(UserRole.STUDENT))
                 .switchIfEmpty(Mono.error(new Exception("학생이 아닙니다")))

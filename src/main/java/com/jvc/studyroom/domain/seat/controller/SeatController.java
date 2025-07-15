@@ -27,26 +27,31 @@ public class SeatController {
 
     private final SeatService seatService;
 
+    // 좌석 리스트
     @GetMapping()
     public Mono<Page<SeatResponse>> getAllSeats(@RequestBody PaginationRequest request) {
         return seatService.findAllSeats(request);
     }
 
+    // 특정 좌석
     @GetMapping("/{seatId}")
     public Mono<SeatDetailResponse> getSeatById(@PathVariable UUID seatId) {
         return seatService.findSeatById(seatId);
     }
 
+    // 좌석 생성
     @PostMapping()
     public Mono<Void> createSeat(@RequestBody SeatRequest request) {
         return seatService.createSeat(request);
     }
 
+    // 특정 좌석에 대한 유저 할당
     @PutMapping("/{seatId}/assignment")
     public Mono<Integer> updateAssignedStudentSeatById(@PathVariable UUID seatId, @RequestBody AssignedStudentSeatRequest request) {
         return seatService.updateAssignedStudentSeatById(seatId, request);
     }
 
+    // 좌석 삭제
     @DeleteMapping("/{seatId}")
     public Mono<Void> deleteSeatById(@PathVariable UUID seatId) {
         return seatService.deleteSeatById(seatId);

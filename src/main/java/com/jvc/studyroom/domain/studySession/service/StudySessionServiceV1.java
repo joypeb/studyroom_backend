@@ -1,8 +1,13 @@
 package com.jvc.studyroom.domain.studySession.service;
 
-import com.jvc.studyroom.domain.studySession.dto.StudySessionListResponse;
-import com.jvc.studyroom.domain.studySession.dto.StudySessionResponse;
+import com.jvc.studyroom.domain.seat.entity.Seat;
+import com.jvc.studyroom.domain.seat.service.SeatFindService;
+import com.jvc.studyroom.domain.studySession.converter.SessionCreateMapper;
+import com.jvc.studyroom.domain.studySession.dto.*;
+import com.jvc.studyroom.domain.studySession.entity.SessionStatus;
 import com.jvc.studyroom.domain.studySession.repository.StudySessionRepository;
+import com.jvc.studyroom.domain.user.model.User;
+import com.jvc.studyroom.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import reactor.core.publisher.Flux;
@@ -12,18 +17,69 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 public class StudySessionServiceV1 implements StudySessionService{
-    private final StudySessionRepository repository;
+    private final StudySessionRepository studySessionRepository;
+    private final UserRepository userRepository;
+    private final SeatFindService seatfindService;
 
     @Override
     public Flux<StudySessionListResponse> getSessionList(Sort sort) {
-        return repository.findAll(sort)
-                // todo. Id로 가져오는것 name으로 변환해서 가져 와야 함
-                .map(session -> new StudySessionListResponse(session.getStudentId(),session.getSessionId()));
+
+
+
+        return studySessionRepository.findAll()
+                .flatMap(session ->
+                        userRepository.findUserByUserId(session.getStudentId())  // Mono<User>
+                                .zipWith(
+                                        seatfindService.findByAssignedStudentId(session.getStudentId())  // Mono<Seat>
+                                )
+                                .map(tuple -> {
+                                    User user = tuple.getT1();
+                                    Seat seat = tuple.getT2();
+                                    return new StudySessionListResponse(
+                                            user.getName(),
+                                            seat.getSeatNumber()
+                                    );
+                                })
+                );
     }
     @Override
     public Mono<StudySessionResponse> getSession(UUID sessionId) {
-        return repository.findStudySessionBySessionId(sessionId)
-                // todo. Id로 가져오는것 name으로 변환해서 가져 와야 함, 어떤 정보를 가져와야 할지 정하기
-                .map(session-> new StudySessionResponse(session.getSessionId(), session.getSeatId()));
+        return studySessionRepository.findBySessionId(sessionId)
+                .flatMap(session ->
+                        userRepository.findUserByUserId(session.getStudentId())
+                                .zipWith(
+                                        seatfindService.findByAssignedStudentId(session.getStudentId())
+                                )
+                                .map(tuple -> {
+                                    User user = tuple.getT1();
+                                    Seat seat = tuple.getT2();
+                                    return new StudySessionResponse(
+                                            user.getName(),
+                                            seat.getSeatNumber()
+                                    );
+                                })
+                );
+    }
+
+    @Override
+    public Mono<StudySessionCreateResponse> createSession(SessionCreateRequest request, User loginUser) {
+        return seatfindService.findSeatIdByAssignedStudentId(loginUser.getUserId())
+                .map(seatId -> SessionCreateMapper.toEntity(
+                        request,
+                        new SessionCreateData(
+                                loginUser.getUserId(),
+                                seatId,
+                                SessionStatus.READY,
+                                1,
+                                loginUser.getUserId()
+                        )
+                ))
+                .flatMap(studySessionRepository::save)
+                .map(savedSession -> new StudySessionCreateResponse(savedSession.getSessionId()));
+    }
+
+    @Override
+    public Mono<Void> resumeSession(UUID sessionId) {
+        return null;
     }
 }

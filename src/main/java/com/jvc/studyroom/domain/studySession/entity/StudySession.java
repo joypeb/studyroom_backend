@@ -1,19 +1,16 @@
 package com.jvc.studyroom.domain.studySession.entity;
-import com.jvc.studyroom.domain.studySession.entity.EndReasonType;
-import com.jvc.studyroom.domain.studySession.entity.SessionStatus;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.relational.core.mapping.Table;
-
 import java.time.OffsetDateTime;
-
-@Table("study_sessions")
+import java.util.UUID;
 @Getter
-@Setter
+@NoArgsConstructor
+@Table("study_sessions")
 public class StudySession {
-    String sessionId;
-    String studentId;
-    String seatId;
+    UUID sessionId;
+    UUID studentId;
+    UUID seatId;
     OffsetDateTime startTime;
     OffsetDateTime endTime;
     OffsetDateTime plannedEndTime;
@@ -25,6 +22,19 @@ public class StudySession {
     String endedBy;
     int version;
     OffsetDateTime createdAt;
-    OffsetDateTime updated_At;
-    String createdBy;
+    OffsetDateTime updatedAt;
+    UUID createdBy;
+
+    private StudySession(UUID studentId, UUID seatId, OffsetDateTime plannedEndTime, SessionStatus sessionStatus, int version, UUID createdBy) {
+        this.studentId = studentId;
+        this.seatId = seatId;
+        this.plannedEndTime = plannedEndTime;
+        this.sessionStatus = sessionStatus;
+        this.version = version;
+        this.createdBy = createdBy;
+    }
+
+    public static StudySession ofCreateEntity(UUID studentId, UUID seatId, OffsetDateTime plannedEndTime, SessionStatus sessionStatus, int version, UUID createdBy) {
+        return new StudySession(studentId, seatId, plannedEndTime, sessionStatus,  version, createdBy);
+    }
 }

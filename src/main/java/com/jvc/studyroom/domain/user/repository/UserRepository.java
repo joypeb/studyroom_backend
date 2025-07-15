@@ -1,9 +1,11 @@
 package com.jvc.studyroom.domain.user.repository;
 
 import com.jvc.studyroom.domain.user.model.User;
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
-import reactor.core.publisher.Flux;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import reactor.core.publisher.Mono;
 
-public interface UserRepository extends ReactiveCrudRepository<User, Long> {
-    Flux<User> findByName(String name);
+import java.util.UUID;
+
+public interface UserRepository extends R2dbcRepository<User, UUID> {
+    Mono<User> findUserByUserId(UUID userId);
 }

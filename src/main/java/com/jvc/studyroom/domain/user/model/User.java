@@ -3,6 +3,8 @@ package com.jvc.studyroom.domain.user.model;
 import com.jvc.studyroom.common.enums.AccountStatus;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
@@ -12,6 +14,7 @@ import org.springframework.data.relational.core.mapping.Table;
 
 @Getter
 @Setter // Setter 안 쓰고 생성자 기법 쓸까 하고 있음
+@Builder
 @Table("users")
 public class User {
     @Id

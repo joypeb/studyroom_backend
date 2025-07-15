@@ -1,5 +1,6 @@
 package com.jvc.studyroom.domain.user.controller;
 import com.jvc.studyroom.domain.user.dto.KakaoUserInfoResponseDto;
+import com.jvc.studyroom.domain.user.dto.TokenResponse;
 import com.jvc.studyroom.domain.user.service.LoginService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +22,15 @@ public class LoginController {
     private String redirect_uri;*/
 
     @GetMapping("/callback")
-    public Mono<ResponseEntity<Flux<KakaoUserInfoResponseDto>>> kakaoLoginCallback(@RequestParam("code") String code) {
+    public Mono<ResponseEntity<TokenResponse>> kakaoLoginCallback(@RequestParam("code") String code) {
         return kakaoLoginService.getAccessTokenFromKakao(code)
-                .flatMap(token -> {
-                    Flux<KakaoUserInfoResponseDto> userInfo = kakaoLoginService.getUserInfo(token);
-                    return Mono.just(ResponseEntity.ok(userInfo));
-                });
+                .flatMap(tokenResponse ->
+                        kakaoLoginService.getUserInfo(tokenResponse.accessToken())
+                                .flatMap(userinfo ->
+                                        kakaoLoginService.createUserByKakaoInfo(userinfo)
+                                                .thenReturn(ResponseEntity.ok(tokenResponse)
+                                )
+                        )
+                );
     }
 }

@@ -1,11 +1,20 @@
 package com.jvc.studyroom.domain.user.service;
 
-import com.jvc.studyroom.domain.user.dto.UserRequest;
+import com.jvc.studyroom.common.dto.PaginationRequest;
 import com.jvc.studyroom.domain.user.dto.UserResponse;
-import reactor.core.publisher.Flux;
+import com.jvc.studyroom.domain.user.dto.UserRoleRequest;
+import com.jvc.studyroom.domain.user.dto.UserStatusRequest;
+import com.jvc.studyroom.domain.user.dto.UserUpdateRequest;
+import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
 public interface UserService {
-    Flux<UserResponse> getAllUsers();
-    Mono<UserResponse> createUser(UserRequest request);
+    Mono<Page<UserResponse>> findAllUsers(PaginationRequest request);
+    Mono<UserResponse> findUserById(UUID userId);
+    Mono<Page<UserResponse>> findAllUsersByRole(UserRoleRequest request);
+    Mono<Integer> updateUserStatusById(UUID userId, UserStatusRequest request);
+    Mono<UserResponse> updateUser(UUID userId, UserUpdateRequest request);
 }

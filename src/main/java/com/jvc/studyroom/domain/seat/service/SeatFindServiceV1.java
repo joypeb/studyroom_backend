@@ -1,6 +1,6 @@
 package com.jvc.studyroom.domain.seat.service;
 
-import com.jvc.studyroom.domain.seat.entity.Seat;
+import com.jvc.studyroom.domain.seat.model.Seat;
 import com.jvc.studyroom.domain.seat.repository.SeatRepository;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;

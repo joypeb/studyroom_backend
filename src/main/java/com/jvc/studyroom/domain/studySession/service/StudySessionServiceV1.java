@@ -1,6 +1,6 @@
 package com.jvc.studyroom.domain.studySession.service;
 
-import com.jvc.studyroom.domain.seat.entity.Seat;
+import com.jvc.studyroom.domain.seat.model.Seat;
 import com.jvc.studyroom.domain.seat.service.SeatFindService;
 import com.jvc.studyroom.domain.studySession.converter.SessionCreateMapper;
 import com.jvc.studyroom.domain.studySession.dto.*;
@@ -25,13 +25,13 @@ public class StudySessionServiceV1 implements StudySessionService{
     public Flux<StudySessionListResponse> getSessionList(Sort sort) {
         return studySessionRepository.findAll(sort)
                 .flatMap(session ->
-                        userRepository.findUserByUserId(session.getStudentId())  // Mono<User>
+                        userRepository.findByUserId(session.getStudentId())  // Mono<User>
                                 .zipWith(
                                         seatfindService.findByAssignedStudentId(session.getStudentId())  // Mono<Seat>
                                 )
                                 .map(tuple -> {
                                     User user = tuple.getT1();
-                                    Seat seat = tuple.getT2();
+                                    com.jvc.studyroom.domain.seat.model.Seat seat = tuple.getT2();
                                     return new StudySessionListResponse(
                                             user.getName(),
                                             seat.getSeatNumber()
@@ -43,7 +43,7 @@ public class StudySessionServiceV1 implements StudySessionService{
     public Mono<StudySessionResponse> getSession(UUID sessionId) {
         return studySessionRepository.findBySessionId(sessionId)
                 .flatMap(session ->
-                        userRepository.findUserByUserId(session.getStudentId())
+                        userRepository.findByUserId(session.getStudentId())
                                 .zipWith(
                                         seatfindService.findByAssignedStudentId(session.getStudentId())
                                 )

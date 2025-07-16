@@ -56,4 +56,16 @@ public interface SeatRepository extends R2dbcRepository<Seat, UUID> {
     @Query("UPDATE seats SET is_active = false, updated_at = now() WHERE seat_id = :seatId")
     Mono<Void> updateIsActiveBySeatId(@Param("seatId") UUID seatId);
 
+    /*
+    특정 학생이 배정된 좌석 조회
+     */
+    // return Seat
+    Mono<Seat> findByAssignedStudentId(UUID assignedStudentId);
+    // return seatId
+    @Query("SELECT seat_id FROM seats WHERE assigned_student_id = :studentId")
+    Mono<UUID> findSeatIdByAssignedStudentId(UUID studentId);
+
 }
+
+
+

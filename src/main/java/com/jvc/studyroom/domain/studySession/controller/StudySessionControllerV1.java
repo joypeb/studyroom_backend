@@ -42,7 +42,7 @@ public class StudySessionControllerV1 {
 
     //특정 학습 세션 상세 정보
     @GetMapping("/{sessionId}")
-    public Mono<StudySessionResponse> getSessionList(@PathVariable UUID sessionId) {
+    public Mono<StudySessionResponse> getSession(@PathVariable UUID sessionId) {
         return service.getSession(sessionId);
     }
     // 학습 세션 생성

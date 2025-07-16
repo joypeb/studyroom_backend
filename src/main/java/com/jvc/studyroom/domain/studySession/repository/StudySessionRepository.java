@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 public interface StudySessionRepository extends R2dbcRepository<StudySession, UUID> {
-    Flux<StudySession> findAll();
+    Flux<StudySession> findAll(Sort sort);
     Mono<StudySession> findBySessionId(UUID sessionId);
         /*
     @Query("SELECT * FROM study_sessions WHERE session_id = :sessionId::uuid")

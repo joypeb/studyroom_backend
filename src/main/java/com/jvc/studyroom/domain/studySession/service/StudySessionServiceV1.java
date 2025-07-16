@@ -23,10 +23,7 @@ public class StudySessionServiceV1 implements StudySessionService{
 
     @Override
     public Flux<StudySessionListResponse> getSessionList(Sort sort) {
-
-
-
-        return studySessionRepository.findAll()
+        return studySessionRepository.findAll(sort)
                 .flatMap(session ->
                         userRepository.findUserByUserId(session.getStudentId())  // Mono<User>
                                 .zipWith(

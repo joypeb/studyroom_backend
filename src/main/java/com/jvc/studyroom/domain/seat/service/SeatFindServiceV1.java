@@ -10,13 +10,13 @@ import java.util.UUID;
 public class SeatFindServiceV1 implements SeatFindService {
     private final SeatRepository seatRepository;
     @Override
-    public Mono<UUID> findSeatIdByAssignedStudentId(UUID studentId) {
-        return null;
+    public Mono<UUID> findSeatIdByAssignedStudentId(UUID userId) {
+        return seatRepository.findSeatIdByAssignedStudentId(userId);
     }
 
     @Override
     public Mono<Seat> findByAssignedStudentId(UUID userId) {
-        return null;
+        return seatRepository.findByAssignedStudentId(userId);
     }
 }
 

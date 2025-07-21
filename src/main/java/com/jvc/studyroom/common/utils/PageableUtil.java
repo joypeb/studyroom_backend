@@ -1,5 +1,6 @@
 package com.jvc.studyroom.common.utils;
 
+import com.jvc.studyroom.common.dto.PaginationRequest;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +47,15 @@ public class PageableUtil {
         return PageRequest.of(
             validatePage(page),
             validateSize(size),
+            sort
+        );
+    }
+
+    public Pageable createPageable(PaginationRequest request) {
+        Sort sort = createSort(request.getSortBy(), request.getSortDirection());
+        return PageRequest.of(
+            validatePage(request.getPage()),
+            validateSize(request.getSize()),
             sort
         );
     }

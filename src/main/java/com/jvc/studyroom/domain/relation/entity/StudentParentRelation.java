@@ -1,4 +1,4 @@
-package com.jvc.studyroom.domain.relation.domain;
+package com.jvc.studyroom.domain.relation.entity;
 
 import com.jvc.studyroom.common.enums.ApprovalStatus;
 import com.jvc.studyroom.common.enums.RelationType;

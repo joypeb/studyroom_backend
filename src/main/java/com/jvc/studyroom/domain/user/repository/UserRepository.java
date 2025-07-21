@@ -3,6 +3,7 @@ package com.jvc.studyroom.domain.user.repository;
 import com.jvc.studyroom.common.enums.AccountStatus;
 import com.jvc.studyroom.common.enums.UserRole;
 import com.jvc.studyroom.domain.user.model.User;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.r2dbc.repository.Query;
@@ -25,4 +26,5 @@ public interface UserRepository extends R2dbcRepository<User, UUID> {
     Mono<User> findUserByAssignedSeatId(UUID seatId);
     Flux<User> findAllByAccountStatusNot(Pageable pageable, AccountStatus accountStatus);
     Mono<Long> countByAccountStatusNot(AccountStatus accountStatus);
+    Flux<User> findByUserIdIn(List<UUID> userIds);
 }

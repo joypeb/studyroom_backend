@@ -10,4 +10,5 @@ public interface UserRepository extends R2dbcRepository<User, UUID> {
     Flux<User> findAllByDeletedAtIsNull();
     Mono<User> findByUserIdAndDeletedAtIsNull(UUID userId);
     Mono<Long> countByEmailAndDeletedAtIsNull(String email);
+    Mono<User> findByEmailAndDeletedAtIsNull(String email);
 }

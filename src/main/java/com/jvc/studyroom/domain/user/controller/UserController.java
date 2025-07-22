@@ -1,8 +1,10 @@
 package com.jvc.studyroom.domain.user.controller;
 import com.jvc.studyroom.domain.user.dto.UserResponse;
+import com.jvc.studyroom.domain.user.security.CustomUserDetails;
 import com.jvc.studyroom.domain.user.service.UserService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -21,5 +23,10 @@ public class UserController {
     @GetMapping("/{userId}")
     public Mono<UserResponse> getUserById(@PathVariable UUID userId) {
         return userService.findUserById(userId);
+    }
+
+    @GetMapping("/me")
+    public Mono<String> getMe(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return Mono.just("현재 유저: " + userDetails.getUsername());
     }
 }

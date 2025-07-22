@@ -35,6 +35,12 @@ dependencies {
 
 	implementation 'io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE' // ← 이게 꼭 필요함!!
 	runtimeOnly 'org.postgresql:postgresql'    // ← R2DBC 초기화용 (JDBC 드라이버)
+
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'	// JWT 토큰
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 }
 
 tasks.named('test') {

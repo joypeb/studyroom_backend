@@ -1,7 +1,6 @@
 
 package com.jvc.studyroom.domain.user.service;
 
-import com.jvc.studyroom.domain.user.converter.UserMapper;
 import com.jvc.studyroom.domain.user.dto.KakaoTokenResponseDto;
 import com.jvc.studyroom.domain.user.dto.KakaoUserInfoResponseDto;
 import com.jvc.studyroom.domain.user.dto.TokenResponse;
@@ -15,10 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.UUID;
 
 @Slf4j
 @Service

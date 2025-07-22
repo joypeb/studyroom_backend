@@ -1,9 +1,6 @@
 package com.jvc.studyroom.domain.studySession.service;
 
-import com.jvc.studyroom.domain.studySession.dto.SessionCreateRequest;
-import com.jvc.studyroom.domain.studySession.dto.StudySessionCreateResponse;
-import com.jvc.studyroom.domain.studySession.dto.StudySessionListResponse;
-import com.jvc.studyroom.domain.studySession.dto.StudySessionResponse;
+import com.jvc.studyroom.domain.studySession.dto.*;
 import com.jvc.studyroom.domain.user.model.User;
 import org.springframework.data.domain.Sort;
 import reactor.core.publisher.Flux;
@@ -20,5 +17,9 @@ public interface StudySessionService {
 
     Mono<StudySessionCreateResponse> createSession(SessionCreateRequest request, User loginUser);
 
-    Mono<Void> resumeSession(UUID sessionId);
+    Mono<Void> changeSessionStatus(SessionChangeStatusRequest request, User loginUser);
+
+    Flux<SessionHistoryResponse> getSessionHistory(UUID studentId);
+
+    Flux<SessionHistoryResponse> getCurrentSession(UUID studentId);
 }

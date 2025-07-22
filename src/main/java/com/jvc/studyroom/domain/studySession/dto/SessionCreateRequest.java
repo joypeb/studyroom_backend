@@ -9,7 +9,4 @@ public record SessionCreateRequest(
         OffsetDateTime plannedEndTime
                                    )
 {
-    public SessionCreateRequest(OffsetDateTime plannedEndTime) {
-        this.plannedEndTime = plannedEndTime;
-    }
 }

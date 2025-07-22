@@ -1,4 +1,4 @@
-package com.jvc.studyroom.domain.user.config;
+package com.jvc.studyroom.config;
 
 import com.jvc.studyroom.domain.user.jwt.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;

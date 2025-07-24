@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@Component
 @Slf4j
 public class PageableUtil {
     private static final int DEFAULT_PAGE = 0;

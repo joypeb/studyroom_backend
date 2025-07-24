@@ -15,14 +15,14 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
-@Service
+//@Service
 public class KakaoLoginService implements LoginService {
 
     private final String clientId;
     private final String KAUTH_TOKEN_URL_HOST;
     private final String KAUTH_USER_URL_HOST;
 
-    @Autowired
+    //@Autowired
     public KakaoLoginService(@Value("${kakao.client_id}") String clientId) {
         this.clientId = clientId;
         KAUTH_TOKEN_URL_HOST ="https://kauth.kakao.com";

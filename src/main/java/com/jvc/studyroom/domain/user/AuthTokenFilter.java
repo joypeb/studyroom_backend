@@ -16,7 +16,7 @@ public class AuthTokenFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         // 임의 테스트용 User
         User mockUser = new User();
-        mockUser.setUserId(UUID.randomUUID());
+        mockUser.setUserId(UUID.fromString("3f9aaeb4-d516-455b-bf76-d4ed6222d42e"));
         mockUser.setName("crystal");
         mockUser.setEmail("crystal@test.com");
 

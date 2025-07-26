@@ -21,6 +21,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
+@Component
 public class PageableUtil {
     private static final int DEFAULT_PAGE = 0;
     private static final int DEFAULT_SIZE = 20;

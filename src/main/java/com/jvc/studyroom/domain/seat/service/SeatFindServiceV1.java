@@ -3,9 +3,11 @@ package com.jvc.studyroom.domain.seat.service;
 import com.jvc.studyroom.domain.seat.model.Seat;
 import com.jvc.studyroom.domain.seat.repository.SeatRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
+@Service
 @RequiredArgsConstructor
 public class SeatFindServiceV1 implements SeatFindService {
     private final SeatRepository seatRepository;

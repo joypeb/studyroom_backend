@@ -21,4 +21,5 @@ public interface StudySessionRepository extends R2dbcRepository<StudySession, UU
     Flux<StudySession> findByStudentId(UUID studentId);
 
     Flux<StudySession> findAllByStudentIdAndSessionStatusIn(UUID studentId, Collection<SessionStatus> status);
+    Flux<StudySession> findAllBySessionStatusIn(Collection<SessionStatus> status);
 }

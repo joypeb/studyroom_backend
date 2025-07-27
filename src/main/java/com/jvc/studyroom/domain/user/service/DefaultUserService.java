@@ -85,7 +85,8 @@ public class DefaultUserService implements UserService {
                     }
                     return Mono.just(user);
                 })
-                .flatMapMany(user -> relationRepository.findAllByStudentId(parentId))
+                .flatMapMany(user -> relationRepository.findAllByParentId(parentId))
+                .filter(StudentParentRelation::getIsActive)
                 .map(StudentParentRelation::getStudentId)
                 .distinct()
                 .flatMap(userRepository::findByUserId)
@@ -103,6 +104,7 @@ public class DefaultUserService implements UserService {
                     return Mono.just(user);
                 })
                 .flatMapMany(user -> relationRepository.findAllByStudentId(studentId))
+                .filter(StudentParentRelation::getIsActive)
                 .map(StudentParentRelation::getParentId)
                 .distinct()
                 .flatMap(userRepository::findByUserId)

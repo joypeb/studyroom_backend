@@ -4,6 +4,7 @@ import com.jvc.studyroom.common.enums.ApprovalStatus;
 import com.jvc.studyroom.common.enums.RelationType;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
@@ -13,6 +14,7 @@ import org.springframework.data.relational.core.mapping.Table;
 
 @Getter
 @Setter
+@Builder
 @Table("student_parent_relations")
 public class StudentParentRelation {
 

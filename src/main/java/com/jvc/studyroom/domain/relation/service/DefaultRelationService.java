@@ -4,6 +4,7 @@ import com.jvc.studyroom.common.dto.PaginationRequest;
 import com.jvc.studyroom.common.utils.PageableUtil;
 import com.jvc.studyroom.domain.relation.converter.RelationMapper;
 import com.jvc.studyroom.domain.relation.dto.RelationDetailResponse;
+import com.jvc.studyroom.domain.relation.dto.RelationRequest;
 import com.jvc.studyroom.domain.relation.dto.RelationResponse;
 import com.jvc.studyroom.domain.relation.repository.RelationRepository;
 import com.jvc.studyroom.domain.user.model.User;
@@ -11,7 +12,6 @@ import com.jvc.studyroom.domain.user.repository.UserRepository;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -67,5 +67,37 @@ public class DefaultRelationService implements RelationService {
                             .collectMap(User::getUserId, Function.identity())
                             .map(userMap -> RelationMapper.toRelationDetailResponse(relation, userMap));
                 });
+    }
+
+    @Override
+    public Mono<Void> createRelation(RelationRequest request) {
+        return relationRepository.existsByParentIdAndStudentId(request.parentId(), request.studentId())
+                .flatMap(exists -> {
+                    if (exists) {
+                        return Mono.error(new Exception("해당 관계가 이미 존재합니다"));
+                    }
+                    return relationRepository.save(RelationMapper.toRelation(request));
+                })
+                .then();
+    }
+
+    @Override
+    public Mono<RelationDetailResponse> updateRelation(UUID relationId, RelationRequest request) {
+        return relationRepository.findByRelationId(relationId)
+                .switchIfEmpty(Mono.error(new Exception("해당 관계가 존재하지 않습니다")))
+                .flatMap(relation ->
+                        relationRepository.save(RelationMapper.toUpdateRelation(relation, request))
+                                .flatMap(updatedRelation -> {
+                                    List<UUID> userIds = List.of(updatedRelation.getStudentId(), updatedRelation.getParentId());
+
+                                    return userRepository.findByUserIdIn(userIds)
+                                            .collectMap(User::getUserId, Function.identity())
+                                            .map(userMap -> RelationMapper.toRelationDetailResponse(updatedRelation, userMap));
+                                }));
+    }
+
+    @Override
+    public Mono<Void> deleteRelation(UUID relationId) {
+        return relationRepository.deActiveRelation(relationId);
     }
 }

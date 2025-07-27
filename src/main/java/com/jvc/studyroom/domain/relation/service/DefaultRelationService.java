@@ -3,6 +3,7 @@ package com.jvc.studyroom.domain.relation.service;
 import com.jvc.studyroom.common.dto.PaginationRequest;
 import com.jvc.studyroom.common.utils.PageableUtil;
 import com.jvc.studyroom.domain.relation.converter.RelationMapper;
+import com.jvc.studyroom.domain.relation.dto.RelationDetailResponse;
 import com.jvc.studyroom.domain.relation.dto.RelationResponse;
 import com.jvc.studyroom.domain.relation.repository.RelationRepository;
 import com.jvc.studyroom.domain.user.model.User;
@@ -21,7 +22,7 @@ import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
-public class DefaultRelationService implements RelationService{
+public class DefaultRelationService implements RelationService {
 
     private final RelationRepository relationRepository;
     private final PageableUtil pageableUtil;
@@ -36,7 +37,7 @@ public class DefaultRelationService implements RelationService{
                 .flatMapMany(relationList -> {
                     if (relationList.isEmpty()) {
                         return pageableUtil.<RelationResponse>createEmptyPageResponse(pageable)
-                            .flatMapMany(page -> Flux.fromIterable(page.getContent()));
+                                .flatMapMany(page -> Flux.fromIterable(page.getContent()));
                     }
 
                     List<UUID> userIds = relationList.stream()
@@ -53,5 +54,18 @@ public class DefaultRelationService implements RelationService{
         Mono<Long> count = relationRepository.count();
 
         return pageableUtil.createPageResponse(relations, count, pageable);
+    }
+
+    @Override
+    public Mono<RelationDetailResponse> findRelationById(UUID relationId) {
+        return relationRepository.findByRelationId(relationId)
+                .switchIfEmpty(Mono.error(new Exception("해당 관계가 존재하지 않습니다")))
+                .flatMap(relation -> {
+                    List<UUID> userIds = List.of(relation.getStudentId(), relation.getParentId());
+
+                    return userRepository.findByUserIdIn(userIds)
+                            .collectMap(User::getUserId, Function.identity())
+                            .map(userMap -> RelationMapper.toRelationDetailResponse(relation, userMap));
+                });
     }
 }

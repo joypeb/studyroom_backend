@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface UserService {
@@ -17,4 +18,6 @@ public interface UserService {
     Mono<Page<UserResponse>> findAllUsersByRole(UserRoleRequest request);
     Mono<Integer> updateUserStatusById(UUID userId, UserStatusRequest request);
     Mono<UserResponse> updateUser(UUID userId, UserUpdateRequest request);
+    Flux<UserResponse> findStudentsByParentId(UUID parentId);
+    Flux<UserResponse> findParentsByStudentId(UUID studentId);
 }

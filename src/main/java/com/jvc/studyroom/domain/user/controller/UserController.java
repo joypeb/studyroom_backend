@@ -50,4 +50,16 @@ public class UserController {
     public Mono<UserResponse> updateUser(@PathVariable UUID userId, @RequestBody UserUpdateRequest request) {
         return userService.updateUser(userId, request);
     }
+
+    // 특정 부모에 대한 학생 리스트
+    @GetMapping("/{parentId}/students")
+    public Flux<UserResponse> getStudentsByParentId(@PathVariable UUID parentId) {
+        return userService.findStudentsByParentId(parentId);
+    }
+
+    // 특정 학생에 대한 부모 리스트
+    @GetMapping("/{studentId}/parents")
+    public Flux<UserResponse> getParentsByStudentId(@PathVariable UUID studentId) {
+        return userService.findParentsByStudentId(studentId);
+    }
 }

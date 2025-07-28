@@ -7,19 +7,19 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@RestController
+//@RestController
 @RequestMapping("/auth/kakao")
 @RequiredArgsConstructor
 public class LoginController {
 
-    private final LoginService kakaoLoginService;
+    //private final LoginService kakaoLoginService;
 
 /*    @Value("${kakao.client_id}")
     private String client_id;
 
     @Value("${kakao.redirect_uri}")
     private String redirect_uri;*/
-
+/*
     @GetMapping("/callback")
     public Mono<ResponseEntity<Flux<KakaoUserInfoResponseDto>>> kakaoLoginCallback(@RequestParam("code") String code) {
         return kakaoLoginService.getAccessTokenFromKakao(code)
@@ -28,4 +28,6 @@ public class LoginController {
                     return Mono.just(ResponseEntity.ok(userInfo));
                 });
     }
+    */
+
 }

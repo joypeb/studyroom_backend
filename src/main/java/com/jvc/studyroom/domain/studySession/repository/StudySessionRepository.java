@@ -1,5 +1,6 @@
 package com.jvc.studyroom.domain.studySession.repository;
 
+import com.jvc.studyroom.domain.studySession.entity.SessionStatus;
 import com.jvc.studyroom.domain.studySession.entity.StudySession;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.r2dbc.repository.Query;
@@ -7,6 +8,7 @@ import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collection;
 import java.util.UUID;
 
 public interface StudySessionRepository extends R2dbcRepository<StudySession, UUID> {
@@ -16,7 +18,7 @@ public interface StudySessionRepository extends R2dbcRepository<StudySession, UU
     @Query("SELECT * FROM study_sessions WHERE session_id = :sessionId::uuid")
     Mono<StudySession> findStudySessionBySessionId(UUID sessionId);
          */
+    Flux<StudySession> findByStudentId(UUID studentId);
 
-    //Mono<StudySession> saveStudySession(StudySession studySession);
-    Flux<StudySession> findStudySessionByStudentId(UUID studentId);
+    Flux<StudySession> findAllByStudentIdAndSessionStatusIn(UUID studentId, Collection<SessionStatus> status);
 }

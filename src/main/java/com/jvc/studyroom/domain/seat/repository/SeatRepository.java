@@ -1,9 +1,7 @@
 package com.jvc.studyroom.domain.seat.repository;
 
-import com.jvc.studyroom.common.enums.AccountStatus;
 import com.jvc.studyroom.common.enums.SeatStatus;
 import com.jvc.studyroom.domain.seat.model.Seat;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.r2dbc.repository.Query;
@@ -14,56 +12,59 @@ import reactor.core.publisher.Mono;
 
 public interface SeatRepository extends R2dbcRepository<Seat, UUID> {
 
-    Flux<Seat> findAllBy(Pageable pageable);
+  Flux<Seat> findAllBy(Pageable pageable);
 
-    Mono<Long> countAllBy();
+  Mono<Long> countAllBy();
 
-    Mono<Seat> findSeatBySeatId(UUID seatId);
+  Mono<Seat> findSeatBySeatId(UUID seatId);
 
-    Mono<Boolean> existsBySeatNumberAndRoomName(String seatNumber, String roomName);
+  Mono<Boolean> existsBySeatNumberAndRoomName(String seatNumber, String roomName);
 
-    @Query("""
-            INSERT INTO seats (
-                seat_id, seat_number, room_name, position_x, position_y, rotation,
-                seat_status, has_power_outlet, has_desk_lamp, has_locker, is_near_window,
-                assigned_student_id, assigned_at, assigned_by, is_active, created_at, updated_at
-            ) VALUES (
-                :#{#seat.seatId}, :#{#seat.seatNumber}, :#{#seat.roomName}, :#{#seat.positionX}, :#{#seat.positionY}, :#{#seat.rotation},
-                :#{#seat.seatStatus}, :#{#seat.hasPowerOutlet}, :#{#seat.hasDeskLamp}, :#{#seat.hasLocker}, :#{#seat.isNearWindow},
-                :#{#seat.assignedStudentId}, :#{#seat.assignedAt}, :#{#seat.assignedBy}, :#{#seat.isActive}, now(), now()
-            )
-            """)
-    Mono<Void> createSeat(Seat seat);
+  @Query("""
+      INSERT INTO seats (
+          seat_id, seat_number, room_name, position_x, position_y, rotation,
+          seat_status, has_power_outlet, has_desk_lamp, has_locker, is_near_window,
+          assigned_student_id, assigned_at, assigned_by, is_active, created_at, updated_at
+      ) VALUES (
+          :#{#seat.seatId}, :#{#seat.seatNumber}, :#{#seat.roomName}, :#{#seat.positionX}, :#{#seat.positionY}, :#{#seat.rotation},
+          :#{#seat.seatStatus}, :#{#seat.hasPowerOutlet}, :#{#seat.hasDeskLamp}, :#{#seat.hasLocker}, :#{#seat.isNearWindow},
+          :#{#seat.assignedStudentId}, :#{#seat.assignedAt}, :#{#seat.assignedBy}, :#{#seat.isActive}, now(), now()
+      )
+      """)
+  Mono<Void> createSeat(Seat seat);
 
-    @Query("""
-            UPDATE seats
-            SET assigned_student_id = :assignedStudentId,
-                assigned_at = now(),
-                assigned_by = :assignedBy,
-                seat_status = :seatStatus,
-                updated_at = now()
-            WHERE seat_id = :seatId
-            """)
-    Mono<Integer> updateAssignedStudentSeatById(
-            @Param("seatId") UUID seatId,
-            @Param("assignedStudentId") UUID assignedStudentId,
-            @Param("assignedBy") UUID assignedBy,
-            @Param("seatStatus") SeatStatus seatStatus
-    );
+  @Query("""
+      UPDATE seats
+      SET assigned_student_id = :assignedStudentId,
+          assigned_at = now(),
+          assigned_by = :assignedBy,
+          seat_status = :seatStatus,
+          updated_at = now()
+      WHERE seat_id = :seatId
+      """)
+  Mono<Integer> updateAssignedStudentSeatById(
+      @Param("seatId") UUID seatId,
+      @Param("assignedStudentId") UUID assignedStudentId,
+      @Param("assignedBy") UUID assignedBy,
+      @Param("seatStatus") SeatStatus seatStatus
+  );
 
-    Mono<Void> deleteSeatBySeatId(UUID seatId);
+  Mono<Void> deleteSeatBySeatId(UUID seatId);
 
-    @Query("UPDATE seats SET is_active = false, updated_at = now() WHERE seat_id = :seatId")
-    Mono<Void> updateIsActiveBySeatId(@Param("seatId") UUID seatId);
+  @Query("UPDATE seats SET is_active = false, updated_at = now() WHERE seat_id = :seatId")
+  Mono<Void> updateIsActiveBySeatId(@Param("seatId") UUID seatId);
 
-    /*
-    특정 학생이 배정된 좌석 조회
-     */
-    // return Seat
-    Mono<Seat> findByAssignedStudentId(UUID assignedStudentId);
-    // return seatId
-    @Query("SELECT seat_id FROM seats WHERE assigned_student_id = :studentId")
-    Mono<UUID> findSeatIdByAssignedStudentId(UUID studentId);
+  /*
+  특정 학생이 배정된 좌석 조회
+   */
+  // return Seat
+  Mono<Seat> findByAssignedStudentId(UUID assignedStudentId);
+
+  // return seatId
+  @Query("SELECT seat_id FROM seats WHERE assigned_student_id = :studentId")
+  Mono<UUID> findSeatIdByAssignedStudentId(UUID studentId);
+
+  Flux<Seat> findAllByIsActiveTrue();
 
 }
 

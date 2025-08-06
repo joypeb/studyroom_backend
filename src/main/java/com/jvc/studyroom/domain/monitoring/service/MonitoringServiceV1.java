@@ -1,113 +1,159 @@
 package com.jvc.studyroom.domain.monitoring.service;
 
 import com.jvc.studyroom.domain.monitoring.dto.SessionMonitoringData;
-import com.jvc.studyroom.domain.monitoring.dto.SessionStatusChangeEvent;
-import com.jvc.studyroom.domain.monitoring.dto.StudySessionMonitoringResponse;
-import com.jvc.studyroom.domain.seat.model.Seat;
-import com.jvc.studyroom.domain.seat.repository.SeatRepository;
+import com.jvc.studyroom.domain.monitoring.dto.SessionSummaryData;
 import com.jvc.studyroom.domain.studySession.entity.SessionStatus;
 import com.jvc.studyroom.domain.studySession.entity.StudySession;
 import com.jvc.studyroom.domain.studySession.repository.StudySessionRepository;
 import com.jvc.studyroom.domain.user.model.User;
 import com.jvc.studyroom.domain.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.Sinks;
-
 import java.time.OffsetDateTime;
-import java.util.List;
+import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
- * 스터디 세션 모니터링 서비스
- * 학생-좌석 1:1 매핑 기반 세션 모니터링
+ * 스터디 세션 모니터링 서비스 - 세션 초기화 기준: 오전 6시 - 활성 세션(ACTIVE, PAUSED)만 조회
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class MonitoringServiceV1 implements MonitoringService {
-    private final SeatRepository seatRepository;
-    private final StudySessionRepository studySessionRepository;
-    private final UserRepository userRepository;
 
-    // 실시간 이벤트 스트림
-    private final Sinks.Many<SessionStatusChangeEvent> sessionEventSink =
-            Sinks.many().multicast().onBackpressureBuffer();
+  private final StudySessionRepository studySessionRepository;
+  private final UserRepository userRepository;
 
-    // 연장 요청 관리 todo. DB같은 외부 저장소 사용 으로 변경
-    //private final Map<UUID, SessionExtensionRequest> pendingExtensions = new HashMap<>();
+  /**
+   * 당일 기준 활성화된 세션들을 스트림으로 반환 (ACTIVE, PAUSED 상태)
+   */
+  @Override
+  public Flux<SessionMonitoringData> getAllTodaySessions() {
+    OffsetDateTime[] todayBounds = calculateTodayBounds();
+    OffsetDateTime startOfToday = todayBounds[0];
+    OffsetDateTime endOfToday = todayBounds[1];
 
-    /**
-     * 전체 활성 세션 모니터링 현황
-     */
-    @Override
-    public Mono<StudySessionMonitoringResponse> getAllActiveSessionsStatus() {
-        return studySessionRepository.findAllBySessionStatusIn(
-                        List.of(SessionStatus.ACTIVE, SessionStatus.PAUSED))
-                .collectList()
-                .flatMap(this::buildMonitoringResponse)
-                .doOnSuccess(response -> log.debug("활성 세션 {} 개 조회 완료", response.totalActiveSessions()))
-                .onErrorResume(error -> {
-                    log.error("활성 세션 현황 조회 오류: ", error);
-                    return Mono.just(StudySessionMonitoringResponse.empty());
-                });
+    log.info("당일 활성 세션 조회 범위 - 시작: {}, 종료: {}", startOfToday, endOfToday);
+
+    return studySessionRepository
+        .findByStartTimeBetween(startOfToday, endOfToday)
+        .filter(this::isActiveSession)
+        .collectList()
+        .flatMapMany(this::buildSessionDataWithStudents);
+  }
+
+  /**
+   * 세션이 활성화 상태인지 확인
+   */
+  private boolean isActiveSession(StudySession session) {
+    return session.getSessionStatus() == SessionStatus.ACTIVE
+        || session.getSessionStatus() == SessionStatus.PAUSED;
+  }
+
+  /**
+   * 오전 6시 기준 당일 시간 범위 계산
+   */
+  private OffsetDateTime[] calculateTodayBounds() {
+    OffsetDateTime now = OffsetDateTime.now();
+    OffsetDateTime startOfToday;
+    OffsetDateTime endOfToday;
+
+    if (now.getHour() < 6) {
+      // 현재 시간이 오전 6시 이전이면 전날 오전 6시부터 오늘 오전 6시까지
+      startOfToday = now.minusDays(1).truncatedTo(ChronoUnit.DAYS).plusHours(6);
+      endOfToday = now.truncatedTo(ChronoUnit.DAYS).plusHours(6);
+    } else {
+      // 현재 시간이 오전 6시 이후면 오늘 오전 6시부터 내일 오전 6시까지
+      startOfToday = now.truncatedTo(ChronoUnit.DAYS).plusHours(6);
+      endOfToday = now.plusDays(1).truncatedTo(ChronoUnit.DAYS).plusHours(6);
     }
 
+    return new OffsetDateTime[]{startOfToday, endOfToday};
+  }
 
+  /**
+   * 당일 활성 세션 목록 스냅샷 (요약)
+   */
+  @Override
+  public Flux<SessionSummaryData> getTodaySessionsSummary() {
+    OffsetDateTime[] todayBounds = calculateTodayBounds();
+    OffsetDateTime startOfToday = todayBounds[0];
+    OffsetDateTime endOfToday = todayBounds[1];
 
+    log.info("당일 활성 세션 요약 조회 범위 - 시작: {}, 종료: {}", startOfToday, endOfToday);
 
-    /**
-     * 모니터링 응답 구성
-     */
-    private Mono<StudySessionMonitoringResponse> buildMonitoringResponse(List<StudySession> sessions) {
-        if (sessions.isEmpty()) {
-            return Mono.just(StudySessionMonitoringResponse.empty());
-        }
+    return studySessionRepository
+        .findByStartTimeBetween(startOfToday, endOfToday)
+        .filter(this::isActiveSession)
+        .collectList()
+        .flatMapMany(this::buildSessionSummaryWithStudents);
+  }
 
-        // 학생 정보 조회
-        Set<UUID> studentIds = sessions.stream()
-                .map(StudySession::getStudentId)
-                .collect(Collectors.toSet());
+  /**
+   * 세션 요약 데이터와 학생 정보를 결합하여 스트림으로 반환
+   */
+  private Flux<SessionSummaryData> buildSessionSummaryWithStudents(
+      java.util.List<StudySession> activeSessions) {
 
-        Mono<Map<UUID, User>> studentMapMono = userRepository.findAllById(studentIds)
-                .collectMap(User::getUserId);
-
-        // 좌석 정보 조회
-        Set<UUID> seatIds = sessions.stream()
-                .map(StudySession::getSeatId)
-                .collect(Collectors.toSet());
-
-        Mono<Map<UUID, Seat>> seatMapMono = seatRepository.findAllById(seatIds)
-                .collectMap(Seat::getSeatId);
-
-        return Mono.zip(studentMapMono, seatMapMono)
-                .map(tuple -> {
-                    Map<UUID, User> studentMap = tuple.getT1();
-                    Map<UUID, Seat> seatMap = tuple.getT2();
-
-                    List<SessionMonitoringData> sessionData = sessions.stream()
-                            .map(session -> SessionMonitoringData.from(
-                                    session,
-                                    studentMap.get(session.getStudentId()),
-                                    seatMap.get(session.getSeatId())
-                            ))
-                            .collect(Collectors.toList());
-
-                    Map<String, List<SessionMonitoringData>> groupSessions = sessionData.stream()
-                            .collect(Collectors.groupingBy(SessionMonitoringData::groupName));
-
-                    return new StudySessionMonitoringResponse(
-                            OffsetDateTime.now(),
-                            sessionData,
-                            groupSessions,
-                            sessionData.size(),
-                            (int) sessionData.stream().map(SessionMonitoringData::studentId).distinct().count()
-                    );
-                });
+    if (activeSessions.isEmpty()) {
+      log.info("활성화된 세션이 없습니다.");
+      return Flux.empty();
     }
+
+    // 학생 정보 조회
+    Set<UUID> studentIds = activeSessions.stream()
+        .map(StudySession::getStudentId)
+        .collect(Collectors.toSet());
+
+    Mono<Map<UUID, User>> studentMapMono = userRepository.findAllById(studentIds)
+        .collectMap(User::getUserId)
+        .defaultIfEmpty(Collections.emptyMap());
+
+    return studentMapMono
+        .flatMapMany(studentMap ->
+            Flux.fromIterable(activeSessions)
+                .map(session -> {
+                  User student = studentMap.get(session.getStudentId());
+                  return SessionSummaryData.from(session, student);
+                })
+        )
+        .doOnNext(summaryData -> log.debug("세션 요약 데이터 생성: {}", summaryData.sessionId()))
+        .doOnComplete(() -> log.info("총 {} 개의 활성 세션 요약 반환", activeSessions.size()));
+  }
+
+  private Flux<SessionMonitoringData> buildSessionDataWithStudents(
+      java.util.List<StudySession> activeSessions) {
+
+    if (activeSessions.isEmpty()) {
+      log.info("활성화된 세션이 없습니다.");
+      return Flux.empty();
+    }
+
+    // 학생 정보 조회
+    Set<UUID> studentIds = activeSessions.stream()
+        .map(StudySession::getStudentId)
+        .collect(Collectors.toSet());
+
+    Mono<Map<UUID, User>> studentMapMono = userRepository.findAllById(studentIds)
+        .collectMap(User::getUserId)
+        .defaultIfEmpty(Collections.emptyMap());
+
+    return studentMapMono
+        .flatMapMany(studentMap ->
+            Flux.fromIterable(activeSessions)
+                .map(session -> {
+                  User student = studentMap.get(session.getStudentId());
+                  return SessionMonitoringData.fromSessionOnly(session, student);
+                })
+        )
+        .doOnNext(sessionData -> log.debug("세션 데이터 생성: {}", sessionData.sessionId()))
+        .doOnComplete(() -> log.info("총 {} 개의 활성 세션 반환", activeSessions.size()));
+  }
 }

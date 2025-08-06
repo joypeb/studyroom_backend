@@ -84,37 +84,6 @@ public record SessionMonitoringData(
   }
 
   /**
-   * 엔티티들로부터 SessionMonitoringData 생성 (좌석 정보 포함)
-   */
-  public static SessionMonitoringData from(
-      StudySession session,
-      User student,
-      com.jvc.studyroom.domain.seat.model.Seat seat) {
-
-    // 세션 지속시간 계산 (plannedEndTime - startTime)
-    SessionDuration duration = calculateSessionDuration(session.getStartTime(),
-        session.getPlannedEndTime());
-
-    return new SessionMonitoringData(
-        session.getSessionId(),
-        session.getSessionStatus(),
-        duration,
-        session.getStartTime(),
-        session.getEndTime(),
-        session.getPlannedEndTime(),
-        isExtensionAvailable(session),
-        false, // TODO: 연장 요청 상태는 별도 관리 필요
-        student.getUserId(),
-        student.getName(),
-        student.getPhoneNumber(),
-        seat.getSeatId(),
-        seat.getSeatNumber(),
-        seat.getRoomName(), // roomName을 groupName으로 사용
-        StudyTimeInfo.from(session.getStartTime(), session.getPlannedEndTime())
-    );
-  }
-
-  /**
    * 세션과 학생 정보만으로 SessionMonitoringData 생성 (좌석 정보 제외)
    */
   public static SessionMonitoringData fromSessionOnly(
@@ -186,33 +155,5 @@ public record SessionMonitoringData(
     // 종료 10분 전부터 연장 가능
     OffsetDateTime extensionAvailableTime = plannedEndTime.minusMinutes(10);
     return now.isAfter(extensionAvailableTime);
-  }
-
-  /**
-   * 현재 세션이 활성 상태인지 확인
-   */
-  public boolean isActiveSession() {
-    return sessionStatus == SessionStatus.ACTIVE || sessionStatus == SessionStatus.PAUSED;
-  }
-
-  /**
-   * 만료 임박 세션인지 확인
-   */
-  public boolean isNearExpiration() {
-    return timeInfo != null && timeInfo.isNearExpiration();
-  }
-
-  /**
-   * 만료된 세션인지 확인
-   */
-  public boolean isExpired() {
-    return timeInfo != null && timeInfo.isExpired();
-  }
-
-  /**
-   * 오버타임 세션인지 확인
-   */
-  public boolean isOvertime() {
-    return timeInfo != null && timeInfo.isOvertime();
   }
 }

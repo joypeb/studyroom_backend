@@ -199,7 +199,7 @@ public class StudySessionServiceV1 implements StudySessionService {
         .switchIfEmpty(Mono.fromRunnable(() ->
             log.error(
                 "not exist findAllByStudentIdAndSessionStatusIn  :: studentId :: {} :: currentStatus :: {}",
-                studentId, currentStatus.toString())
+                studentId, currentStatus)
         ))
         .map(SessionFindMapper::toSessionHistoryResponse)
         .doOnError(error -> log.error("getCurrentSession fail ::: {}", error))

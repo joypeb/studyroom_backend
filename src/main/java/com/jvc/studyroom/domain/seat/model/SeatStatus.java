@@ -1,4 +1,4 @@
-package com.jvc.studyroom.domain.seat.entity;
+package com.jvc.studyroom.domain.seat.model;
 
 public enum SeatStatus {
     AVAILABLE,

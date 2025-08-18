@@ -5,6 +5,7 @@ import com.jvc.studyroom.domain.monitoring.dto.SessionSummaryData;
 import com.jvc.studyroom.domain.studySession.entity.SessionStatus;
 import com.jvc.studyroom.domain.studySession.entity.StudySession;
 import com.jvc.studyroom.domain.studySession.repository.StudySessionRepository;
+import com.jvc.studyroom.domain.studySession.service.StudySessionTimeCalculator;
 import com.jvc.studyroom.domain.user.model.User;
 import com.jvc.studyroom.domain.user.repository.UserRepository;
 import java.time.OffsetDateTime;
@@ -30,6 +31,7 @@ public class MonitoringServiceV1 implements MonitoringService {
 
   private final StudySessionRepository studySessionRepository;
   private final UserRepository userRepository;
+  private final StudySessionTimeCalculator timeCalculator;  // 추가
 
   /**
    * 당일 기준 활성화된 세션들을 스트림으로 반환 (ACTIVE, PAUSED 상태)
@@ -121,7 +123,7 @@ public class MonitoringServiceV1 implements MonitoringService {
             Flux.fromIterable(activeSessions)
                 .map(session -> {
                   User student = studentMap.get(session.getStudentId());
-                  return SessionSummaryData.from(session, student);
+                  return SessionSummaryData.from(session, student, timeCalculator);  // timeCalculator 추가
                 })
         )
         .doOnNext(summaryData -> log.debug("세션 요약 데이터 생성: {}", summaryData.sessionId()))

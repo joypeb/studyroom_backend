@@ -35,6 +35,7 @@ public class StudySessionServiceV1 implements StudySessionService {
   private final StudySessionRepository studySessionRepository;
   private final UserRepository userRepository;
   private final SeatFindService seatfindService;
+  private final StudySessionTimeCalculator timeCalculator;  // 추가
 
   @Override
   public Flux<StudySessionListResponse> getSessionList(Sort sort) {
@@ -117,39 +118,39 @@ public class StudySessionServiceV1 implements StudySessionService {
   }
 
   /**
-   * 세션 상태 변경 시 시간 추적 업데이트
-   * todo. event 테이블 만들어서 관리한다면 해당 로직은 필요 없음
+   * 세션 상태 변경 시 시간 추적 업데이트 - 계산 로직을 TimeCalculator에 위임
    */
   private StudySession updateSessionWithTimeTracking(StudySession original,
       SessionStatus newStatus) {
     OffsetDateTime now = TimeUtil.nowInKorea();
-    SessionStatus oldStatus = original.getSessionStatus();
 
-    log.info("세션 상태 변경: {} -> {} (세션: {})", oldStatus, newStatus, original.getSessionId());
+    // 시간 계산을 전담 서비스에 위임
+    StudySessionTimeCalculator.StudySessionTimeUpdate timeUpdate =
+        timeCalculator.calculateTimeUpdateForStatusChange(original, newStatus, now);
 
-    // 상태 변경에 따른 시간 계산
+    log.info("세션 상태 변경: {} -> {} (세션: {})",
+        original.getSessionStatus(), newStatus, original.getSessionId());
+
+    // 계산 결과를 바탕으로 업데이트
     StudySession.StudySessionBuilder builder = original.toBuilder()
         .sessionStatus(newStatus)
         .updatedAt(now);
 
-    // 이전 상태가 ACTIVE였다면 공부 시간 누적
-    if (oldStatus == SessionStatus.ACTIVE) {
-      long additionalStudyMinutes = calculateTimeSinceLastUpdate(original, now);
-      int newTotalStudyMinutes = original.getTotalStudyMinutes() + (int) additionalStudyMinutes;
+    if (timeUpdate.additionalStudyMinutes() > 0) {
+      int newTotalStudyMinutes =
+          original.getTotalStudyMinutes() + (int) timeUpdate.additionalStudyMinutes();
       builder.totalStudyMinutes(newTotalStudyMinutes);
-      log.info("공부 시간 추가: {}분 (총: {}분)", additionalStudyMinutes, newTotalStudyMinutes);
+      log.info("공부 시간 추가: {}분 (총: {}분)", timeUpdate.additionalStudyMinutes(), newTotalStudyMinutes);
     }
 
-    // 이전 상태가 PAUSED였다면 휴식 시간 누적  
-    if (oldStatus == SessionStatus.PAUSED) {
-      long additionalBreakMinutes = calculateTimeSinceLastUpdate(original, now);
-      int newTotalBreakMinutes = original.getTotalBreakMinutes() + (int) additionalBreakMinutes;
+    if (timeUpdate.additionalBreakMinutes() > 0) {
+      int newTotalBreakMinutes =
+          original.getTotalBreakMinutes() + (int) timeUpdate.additionalBreakMinutes();
       builder.totalBreakMinutes(newTotalBreakMinutes);
-      log.info("휴식 시간 추가: {}분 (총: {}분)", additionalBreakMinutes, newTotalBreakMinutes);
+      log.info("휴식 시간 추가: {}분 (총: {}분)", timeUpdate.additionalBreakMinutes(), newTotalBreakMinutes);
     }
 
-    // PAUSED로 변경 시 pause 카운트 증가
-    if (newStatus == SessionStatus.PAUSED && oldStatus != SessionStatus.PAUSED) {
+    if (timeUpdate.shouldIncrementPauseCount()) {
       builder.pauseCount(original.getPauseCount() + 1);
       log.info("일시정지 횟수 증가: {}", original.getPauseCount() + 1);
     }
@@ -161,20 +162,6 @@ public class StudySessionServiceV1 implements StudySessionService {
     }
 
     return builder.build();
-  }
-
-  /**
-   * 마지막 업데이트 이후 경과 시간 계산 (분)
-   */
-  private long calculateTimeSinceLastUpdate(StudySession session, OffsetDateTime now) {
-    OffsetDateTime lastUpdate = session.getUpdatedAt() != null ?
-        session.getUpdatedAt() : session.getCreatedAt();
-
-    if (lastUpdate == null) {
-      lastUpdate = session.getStartTime();
-    }
-
-    return java.time.temporal.ChronoUnit.MINUTES.between(lastUpdate, now);
   }
 
   @Override

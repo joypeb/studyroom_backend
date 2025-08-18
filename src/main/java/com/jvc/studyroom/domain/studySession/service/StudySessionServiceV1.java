@@ -106,10 +106,10 @@ public class StudySessionServiceV1 implements StudySessionService {
 
   @Override
   public Mono<Void> changeSessionStatus(SessionChangeStatusRequest request, User loginUser) {
-    return studySessionRepository.findBySessionId(request.studySessionId())
+    return studySessionRepository.findBySessionId(request.sessionId())
         .switchIfEmpty(Mono.error(new StudyroomServiceException(
             ErrorCode.SESSION_BY_USER_NOT_EXIST)))
-        .map(original -> updateSessionWithTimeTracking(original, request.sessionStatus()))
+        .map(original -> updateSessionWithTimeTracking(original, request.newStatus()))
         .flatMap(studySessionRepository::save)
         .doOnError(error -> log.error("changeSessionStatus fail ::: {}", error))
         .doOnNext(updated -> log.info("changeSessionStatus success ::: {}", updated.toString()))

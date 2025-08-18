@@ -25,10 +25,10 @@ public record SessionSummaryData(
      * StudySession과 User로부터 SessionSummaryData 생성
      */
     public static SessionSummaryData from(
-            StudySession session, 
-            User student, 
+            StudySession session,
+            User student,
             StudySessionTimeCalculator timeCalculator) {
-        
+
         long studyMinutes = timeCalculator.calculateCurrentStudyMinutes(session);
         String formattedTime = TimeFormatUtil.formatStudyTime(studyMinutes);
 

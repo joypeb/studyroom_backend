@@ -1,5 +1,9 @@
 package com.jvc.studyroom.domain.user.controller;
+import com.jvc.studyroom.common.dto.PaginationRequest;
 import com.jvc.studyroom.domain.user.dto.UserResponse;
+import com.jvc.studyroom.domain.user.dto.UserRoleRequest;
+import com.jvc.studyroom.domain.user.dto.UserStatusRequest;
+import com.jvc.studyroom.domain.user.dto.UserUpdateRequest;
 import com.jvc.studyroom.domain.user.security.CustomUserDetails;
 import com.jvc.studyroom.domain.user.service.UserService;
 import java.util.UUID;

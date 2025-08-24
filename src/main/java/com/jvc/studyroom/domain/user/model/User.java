@@ -1,10 +1,9 @@
 package com.jvc.studyroom.domain.user.model;
 
 import com.jvc.studyroom.common.enums.AccountStatus;
+import com.jvc.studyroom.common.enums.UserRole;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-
-import com.jvc.studyroom.common.enums.UserRole;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,4 +34,6 @@ public class User {
     private OffsetDateTime updatedAt;
     private OffsetDateTime deletedAt;
     private UserRole role = UserRole.NONE;
+    private UserRole role = UserRole.NONE;
+    private UUID assignedSeatId;
 }

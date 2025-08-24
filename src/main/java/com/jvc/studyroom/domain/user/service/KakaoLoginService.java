@@ -3,9 +3,6 @@ package com.jvc.studyroom.domain.user.service;
 
 import com.jvc.studyroom.domain.user.dto.KakaoTokenResponseDto;
 import com.jvc.studyroom.domain.user.dto.KakaoUserInfoResponseDto;
-import com.jvc.studyroom.domain.user.dto.TokenResponse;
-import com.jvc.studyroom.domain.user.model.User;
-import com.jvc.studyroom.domain.user.repository.UserRepository;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j

@@ -12,3 +12,16 @@ kakao:
 
 jwt:
   secret: ${JWT_SECRET_KEY}
+  # 시간대 설정
+  jackson:
+    time-zone: Asia/Seoul
+
+# JVM 시간대 설정
+server:
+  timezone: Asia/Seoul
+
+logging:
+  level:
+    org.springframework.web.reactive.function.server: DEBUG
+    org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping: DEBUG
+    com.jvc.studyroom.domain.studySession: DEBUG  # 세션 관련 디버그 로그

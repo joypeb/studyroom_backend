@@ -23,6 +23,9 @@
 ```
 
 ## structure-description
-- service, repository 계층은 인터페이스랑 구현체 나눠주세요 (아래는 네이밍 추천)
-  - LoginService (인터페이스) - LoginServiceImpl (구현체)
-  - LoginService (인터페이스) - KaKaoLoginService (구현체)
+- service, repository 계층은 인터페이스랑 구현체 나눠주세요 
+- 인터페이스 명명규칙
+  - 참고 (https://www.baeldung.com/java-interface-naming-conventions)
+  - 능력을 의미하는 인터페이스 : 형용사로 이름 짓기 ex) Comparable
+  - 다형성을 의미하는 인터페이스 : 명사로 이름 짓고, 구체화클레스는 전문 분야와 인터페이스 이름 결합 ex) List<E> -> LinkedList<E>
+    - LoginService (인터페이스) - KaKaoLoginService | NaverLoginService (구현체)

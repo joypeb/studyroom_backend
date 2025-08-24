@@ -1,10 +1,13 @@
 package com.jvc.studyroom.domain.user.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Builder;
+
 import com.jvc.studyroom.common.enums.UserRole;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+@Builder
 public record UserResponse(
         UUID userId,
         String email,

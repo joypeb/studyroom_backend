@@ -1,18 +1,16 @@
 package com.jvc.studyroom.domain.user.controller;
 import com.jvc.studyroom.common.dto.PaginationRequest;
-import com.jvc.studyroom.common.utils.PageableUtil;
 import com.jvc.studyroom.domain.user.dto.UserResponse;
 import com.jvc.studyroom.domain.user.dto.UserRoleRequest;
 import com.jvc.studyroom.domain.user.dto.UserStatusRequest;
 import com.jvc.studyroom.domain.user.dto.UserUpdateRequest;
+import com.jvc.studyroom.domain.user.security.CustomUserDetails;
 import com.jvc.studyroom.domain.user.service.UserService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -49,5 +47,15 @@ public class UserController {
     @PutMapping("/{userId}")
     public Mono<UserResponse> updateUser(@PathVariable UUID userId, @RequestBody UserUpdateRequest request) {
         return userService.updateUser(userId, request);
+    }
+
+    @GetMapping("/me")
+    public Mono<UserResponse> getMe(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return Mono.just(UserResponse.builder()
+                .email(userDetails.getUser().getEmail())
+                .name(userDetails.getUser().getName())
+                .phoneNumber(userDetails.getUser().getPhoneNumber())
+                .build()
+        );
     }
 }

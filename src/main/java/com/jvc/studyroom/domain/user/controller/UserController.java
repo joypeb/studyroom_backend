@@ -26,7 +26,12 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public Mono<String> getMe(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return Mono.just("현재 유저: " + userDetails.getUser().getEmail() + " " + userDetails.getAuthorities() + " " + userDetails.getUser().getPhoneNumber());
+    public Mono<UserResponse> getMe(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return Mono.just(UserResponse.builder()
+                .email(userDetails.getUser().getEmail())
+                .name(userDetails.getUser().getName())
+                .phoneNumber(userDetails.getUser().getPhoneNumber())
+                .build()
+        );
     }
 }

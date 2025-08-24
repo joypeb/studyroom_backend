@@ -21,6 +21,7 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(formLogin -> formLogin.disable())
                 .authorizeExchange(exchanges -> exchanges
+//                        .anyExchange().permitAll()    // 모든 권한 허용
                         .pathMatchers("/auth/**").permitAll()
                         .anyExchange().authenticated()
                 )

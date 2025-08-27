@@ -30,6 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("StudySessionControllerV1 테스트")
@@ -54,6 +55,8 @@ class StudySessionControllerV1Test {
     StudySessionControllerV1 controller = new StudySessionControllerV1(studySessionService);
     webTestClient = WebTestClient
         .bindToController(controller)
+        .configureClient()
+        .defaultHeader("X-User-Id", testUser.getUserId().toString())
         .build();
   }
 
@@ -270,18 +273,19 @@ class StudySessionControllerV1Test {
           120, 10, 1, null
       );
       Flux<SessionHistoryResponse> responseFlux = Flux.just(response1);
+      
+      StudySessionControllerV1 controller = new StudySessionControllerV1(studySessionService);
+      when(studySessionService.getSessionHistory(testUser.getUserId())).thenReturn(responseFlux);
 
-      when(studySessionService.getSessionHistory(any(UUID.class))).thenReturn(responseFlux);
+      // when
+      Flux<SessionHistoryResponse> result = controller.getSessionHistoryByLoginedStudent(testUser);
 
-      // when & then
-      webTestClient.get()
-          .uri("/study/sessions/session-history")
-          .exchange()
-          .expectStatus().isOk()
-          .expectBodyList(SessionHistoryResponse.class)
-          .hasSize(1);
+      // then
+      StepVerifier.create(result)
+          .expectNext(response1)
+          .verifyComplete();
 
-      verify(studySessionService).getSessionHistory(any(UUID.class));
+      verify(studySessionService).getSessionHistory(testUser.getUserId());
     }
   }
 
@@ -328,35 +332,37 @@ class StudySessionControllerV1Test {
           60, 5, 0, null
       );
       Flux<SessionHistoryResponse> responseFlux = Flux.just(response);
+      
+      // Controller 직접 테스트
+      StudySessionControllerV1 controller = new StudySessionControllerV1(studySessionService);
+      when(studySessionService.getCurrentSession(testUser.getUserId())).thenReturn(responseFlux);
 
-      when(studySessionService.getCurrentSession(any(UUID.class))).thenReturn(responseFlux);
+      // when
+      Flux<SessionHistoryResponse> result = controller.getCurrentSessionByStudent(testUser);
 
-      // when & then
-      webTestClient.get()
-          .uri("/study/sessions/current")
-          .exchange()
-          .expectStatus().isOk()
-          .expectBodyList(SessionHistoryResponse.class)
-          .hasSize(1);
+      // then
+      StepVerifier.create(result)
+          .expectNext(response)
+          .verifyComplete();
 
-      verify(studySessionService).getCurrentSession(any(UUID.class));
+      verify(studySessionService).getCurrentSession(testUser.getUserId());
     }
 
     @Test
     @DisplayName("성공: 현재 활성 세션이 없는 경우 빈 배열을 반환한다")
     void getCurrentSessionByStudent_Success_Empty() {
       // given
-      when(studySessionService.getCurrentSession(any(UUID.class))).thenReturn(Flux.empty());
+      StudySessionControllerV1 controller = new StudySessionControllerV1(studySessionService);
+      when(studySessionService.getCurrentSession(testUser.getUserId())).thenReturn(Flux.empty());
 
-      // when & then
-      webTestClient.get()
-          .uri("/study/sessions/current")
-          .exchange()
-          .expectStatus().isOk()
-          .expectBodyList(SessionHistoryResponse.class)
-          .hasSize(0);
+      // when
+      Flux<SessionHistoryResponse> result = controller.getCurrentSessionByStudent(testUser);
 
-      verify(studySessionService).getCurrentSession(any(UUID.class));
+      // then
+      StepVerifier.create(result)
+          .verifyComplete();
+
+      verify(studySessionService).getCurrentSession(testUser.getUserId());
     }
   }
 }

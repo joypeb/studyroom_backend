@@ -21,6 +21,7 @@ import com.jvc.studyroom.domain.studySession.entity.SessionDuration;
 import com.jvc.studyroom.domain.studySession.entity.SessionStatus;
 import com.jvc.studyroom.domain.studySession.entity.StudySession;
 import com.jvc.studyroom.domain.studySession.repository.StudySessionRepository;
+import com.jvc.studyroom.domain.studySession.service.StudySessionTimeCalculator;
 import com.jvc.studyroom.domain.user.model.User;
 import com.jvc.studyroom.domain.user.repository.UserRepository;
 import com.jvc.studyroom.exception.customExceptions.StudyroomServiceException;
@@ -52,6 +53,9 @@ class StudySessionServiceV1Test {
 
   @Mock
   private SeatFindService seatFindService;
+
+  @Mock
+  private StudySessionTimeCalculator timeCalculator;
 
   @InjectMocks
   private StudySessionServiceV1 studySessionService;
@@ -331,8 +335,13 @@ class StudySessionServiceV1Test {
           .sessionStatus(SessionStatus.ACTIVE)
           .build();
 
+      StudySessionTimeCalculator.StudySessionTimeUpdate timeUpdate = 
+          new StudySessionTimeCalculator.StudySessionTimeUpdate(0, 0, false);
+
       when(studySessionRepository.findBySessionId(testSessionId))
           .thenReturn(Mono.just(existingSession));
+      when(timeCalculator.calculateTimeUpdateForStatusChange(any(StudySession.class), any(SessionStatus.class), any(OffsetDateTime.class)))
+          .thenReturn(timeUpdate);
       when(studySessionRepository.save(any(StudySession.class)))
           .thenReturn(Mono.just(updatedSession));
 
@@ -344,6 +353,7 @@ class StudySessionServiceV1Test {
           .verifyComplete();
 
       verify(studySessionRepository).findBySessionId(testSessionId);
+      verify(timeCalculator).calculateTimeUpdateForStatusChange(any(StudySession.class), any(SessionStatus.class), any(OffsetDateTime.class));
       verify(studySessionRepository).save(any(StudySession.class));
     }
 
@@ -362,8 +372,13 @@ class StudySessionServiceV1Test {
           .updatedAt(OffsetDateTime.now().minusMinutes(10)) // 10분 전 업데이트
           .build();
 
+      StudySessionTimeCalculator.StudySessionTimeUpdate timeUpdate = 
+          new StudySessionTimeCalculator.StudySessionTimeUpdate(10, 0, true);
+
       when(studySessionRepository.findBySessionId(testSessionId))
           .thenReturn(Mono.just(existingSession));
+      when(timeCalculator.calculateTimeUpdateForStatusChange(any(StudySession.class), any(SessionStatus.class), any(OffsetDateTime.class)))
+          .thenReturn(timeUpdate);
       when(studySessionRepository.save(any(StudySession.class)))
           .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
@@ -375,6 +390,7 @@ class StudySessionServiceV1Test {
           .verifyComplete();
 
       verify(studySessionRepository).findBySessionId(testSessionId);
+      verify(timeCalculator).calculateTimeUpdateForStatusChange(any(StudySession.class), any(SessionStatus.class), any(OffsetDateTime.class));
       verify(studySessionRepository).save(argThat(session ->
           session.getSessionStatus() == SessionStatus.PAUSED &&
               session.getPauseCount() == 1 &&
@@ -396,8 +412,13 @@ class StudySessionServiceV1Test {
           .updatedAt(OffsetDateTime.now().minusMinutes(5)) // 5분 전 업데이트
           .build();
 
+      StudySessionTimeCalculator.StudySessionTimeUpdate timeUpdate = 
+          new StudySessionTimeCalculator.StudySessionTimeUpdate(0, 5, false);
+
       when(studySessionRepository.findBySessionId(testSessionId))
           .thenReturn(Mono.just(existingSession));
+      when(timeCalculator.calculateTimeUpdateForStatusChange(any(StudySession.class), any(SessionStatus.class), any(OffsetDateTime.class)))
+          .thenReturn(timeUpdate);
       when(studySessionRepository.save(any(StudySession.class)))
           .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 

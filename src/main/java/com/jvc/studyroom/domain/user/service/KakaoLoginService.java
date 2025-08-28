@@ -107,6 +107,9 @@ public class KakaoLoginService implements LoginService {
 
     // 전화번호 형식 변환 (+82 10-1234-5678 -> 010-1234-5678)
     public String changePhoneNumberFormat(String phoneNumber) {
+        if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
+            return null;
+        }
         if (phoneNumber.startsWith("+82")) {
             return phoneNumber.replace("+82 ", "0");
         }

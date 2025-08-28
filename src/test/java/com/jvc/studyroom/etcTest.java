@@ -3,11 +3,26 @@ package com.jvc.studyroom;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 public class etcTest {
+
+
+  @Nested
+  @DisplayName("Strnig 함수 객체에 null이 들어 갔을 때 에러를 일으킨다.")
+  class nullTest {
+
+    @Test
+    void test() {
+      String nullStr = null;
+      Assertions.assertThrows(NullPointerException.class, () -> {
+        nullStr.startsWith("h");
+      });
+    }
+  }
 
   @Nested
   @DisplayName(".flatmap 기능 확인하기")

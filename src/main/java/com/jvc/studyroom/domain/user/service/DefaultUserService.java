@@ -4,13 +4,19 @@ import com.jvc.studyroom.common.dto.PaginationRequest;
 import com.jvc.studyroom.common.enums.AccountStatus;
 import com.jvc.studyroom.common.enums.UserRole;
 import com.jvc.studyroom.common.utils.PageableUtil;
+import com.jvc.studyroom.domain.relation.dto.RelationResponse;
+import com.jvc.studyroom.domain.relation.entity.StudentParentRelation;
+import com.jvc.studyroom.domain.relation.repository.RelationRepository;
 import com.jvc.studyroom.domain.user.converter.UserMapper;
 import com.jvc.studyroom.domain.user.dto.UserResponse;
 import com.jvc.studyroom.domain.user.dto.UserRoleRequest;
 import com.jvc.studyroom.domain.user.dto.UserStatusRequest;
 import com.jvc.studyroom.domain.user.dto.UserUpdateRequest;
+import com.jvc.studyroom.domain.user.model.User;
 import com.jvc.studyroom.domain.user.repository.UserRepository;
+import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +30,7 @@ import reactor.core.publisher.Mono;
 public class DefaultUserService implements UserService {
 
     private final UserRepository userRepository;
+    private final RelationRepository relationRepository;
     private final PageableUtil pageableUtil;
 
     private final static AccountStatus STATUS_ACTIVE = AccountStatus.ACTIVE;
@@ -66,6 +73,42 @@ public class DefaultUserService implements UserService {
                 .filter(user -> user.getAccountStatus().equals(AccountStatus.ACTIVE))
                 .switchIfEmpty(Mono.error(new Exception("해당 사용자가 존재하지 않습니다")))
                 .flatMap(existingUser -> userRepository.save(UserMapper.toUpdateUser(existingUser, request)).map(UserMapper::toUserResponse));
+    }
+
+    @Override
+    public Flux<UserResponse> findStudentsByParentId(UUID parentId) {
+        return userRepository.findByUserId(parentId)
+                .switchIfEmpty(Mono.error(new Exception("해당 사용자가 존재하지 않습니다")))
+                .flatMap(user -> {
+                    if (user.getRole() != UserRole.PARENTS) {
+                        return Mono.error(new Exception("해당 사용자는 부모가 아닙니다"));
+                    }
+                    return Mono.just(user);
+                })
+                .flatMapMany(user -> relationRepository.findAllByParentId(parentId))
+                .filter(StudentParentRelation::getIsActive)
+                .map(StudentParentRelation::getStudentId)
+                .distinct()
+                .flatMap(userRepository::findByUserId)
+                .map(UserMapper::toUserResponse);
+    }
+
+    @Override
+    public Flux<UserResponse> findParentsByStudentId(UUID studentId) {
+        return userRepository.findByUserId(studentId)
+                .switchIfEmpty(Mono.error(new Exception("해당 사용자가 존재하지 않습니다")))
+                .flatMap(user -> {
+                    if (user.getRole() != UserRole.STUDENT) {
+                        return Mono.error(new Exception("해당 사용자는 학생이 아닙니다"));
+                    }
+                    return Mono.just(user);
+                })
+                .flatMapMany(user -> relationRepository.findAllByStudentId(studentId))
+                .filter(StudentParentRelation::getIsActive)
+                .map(StudentParentRelation::getParentId)
+                .distinct()
+                .flatMap(userRepository::findByUserId)
+                .map(UserMapper::toUserResponse);
     }
 
     private Pageable createPageable(Integer page, Integer size, String sortBy, String sortDirection) {

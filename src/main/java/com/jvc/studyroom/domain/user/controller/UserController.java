@@ -49,6 +49,18 @@ public class UserController {
         return userService.updateUser(userId, request);
     }
 
+    // 특정 부모에 대한 학생 리스트
+    @GetMapping("/{parentId}/students")
+    public Flux<UserResponse> getStudentsByParentId(@PathVariable UUID parentId) {
+        return userService.findStudentsByParentId(parentId);
+    }
+
+    // 특정 학생에 대한 부모 리스트
+    @GetMapping("/{studentId}/parents")
+    public Flux<UserResponse> getParentsByStudentId(@PathVariable UUID studentId) {
+        return userService.findParentsByStudentId(studentId);
+    }
+
     @GetMapping("/me")
     public Mono<UserResponse> getMe(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return Mono.just(UserResponse.builder()

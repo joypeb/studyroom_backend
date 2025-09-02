@@ -23,4 +23,8 @@ public record ApiResponse<T>(
   public static <T> ApiResponse<T> error(String message) {
     return new ApiResponse<>(false, message, null, OffsetDateTime.now());
   }
+
+  public static <T> ApiResponse<T> error(String message, T data) {
+    return new ApiResponse<>(false, message, data, OffsetDateTime.now());
+  }
 }

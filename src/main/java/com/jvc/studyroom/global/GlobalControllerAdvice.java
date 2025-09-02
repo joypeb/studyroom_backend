@@ -1,5 +1,6 @@
 package com.jvc.studyroom.global;
 
+import com.jvc.studyroom.common.dto.ApiResponse;
 import com.jvc.studyroom.exception.ErrorCode;
 import com.jvc.studyroom.exception.customExceptions.StudyroomServiceException;
 import com.jvc.studyroom.exception.dto.ErrorResponse;
@@ -18,17 +19,17 @@ import java.time.LocalDateTime;
 public class GlobalControllerAdvice {
 
     @ExceptionHandler(StudyroomServiceException.class)
-    public ResponseEntity<ErrorResponse> handleStudyroomServiceException(
+    public ResponseEntity<ApiResponse<String>> handleStudyroomServiceException(
             StudyroomServiceException ex, ServerWebExchange exchange) {
 
         log.error("StudyroomServiceException occurred: {}", ex.getMessage(), ex);
 
         String path = exchange.getRequest().getURI().getPath();
-        ErrorResponse errorResponse = ErrorResponse.of(ex.getErrorCode(), path);
+
 
         return ResponseEntity
                 .status(ex.getErrorCode().getStatus())
-                .body(errorResponse);
+                .body(ApiResponse.error(ex.getErrorCode().getMessage(), path));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -88,7 +89,7 @@ public class GlobalControllerAdvice {
         );
 
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .status(ErrorCode.INTERNAL_SERVER_ERROR.getStatus())
                 .body(errorResponse);
     }
 }

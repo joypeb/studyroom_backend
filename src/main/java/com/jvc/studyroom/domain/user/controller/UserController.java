@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -20,45 +21,45 @@ public class UserController {
     private final UserService userService;
 
     // 전체 유저 리스트
-    @GetMapping
-    public Mono<Page<UserResponse>> getAllUsers(@RequestBody PaginationRequest request) {
-        return userService.findAllUsers(request);
+    @PostMapping
+    public Mono<Page<UserResponse>> getAllUsers(@RequestBody PaginationRequest request, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return userService.findAllUsers(request, userDetails.getUser());
     }
 
     // 특정 유저
     @GetMapping("/{userId}")
-    public Mono<UserResponse> getUserById(@PathVariable UUID userId) {
-        return userService.findUserById(userId);
+    public Mono<UserResponse> getUserById(@PathVariable UUID userId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return userService.findUserById(userId, userDetails.getUser());
     }
 
     // 특정 역할에 대한 유저 리스트
-    @GetMapping("/role")
-    public Mono<Page<UserResponse>> getAllUsersByRole(@RequestBody UserRoleRequest request) {
-        return userService.findAllUsersByRole(request);
+    @PostMapping("/role")
+    public Mono<Page<UserResponse>> getAllUsersByRole(@RequestBody UserRoleRequest request, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return userService.findAllUsersByRole(request, userDetails.getUser());
     }
 
     // 특정 유저에 대한 상태 수정
     @PutMapping("/{userId}/status")
-    public Mono<Integer> updateUserStatusById(@PathVariable UUID userId, @RequestBody UserStatusRequest request) {
-        return userService.updateUserStatusById(userId, request);
+    public Mono<Integer> updateUserStatusById(@PathVariable UUID userId, @RequestBody UserStatusRequest request, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return userService.updateUserStatusById(userId, request, userDetails.getUser());
     }
 
     //유저 수정
     @PutMapping("/{userId}")
-    public Mono<UserResponse> updateUser(@PathVariable UUID userId, @RequestBody UserUpdateRequest request) {
-        return userService.updateUser(userId, request);
+    public Mono<UserResponse> updateUser(@PathVariable UUID userId, @RequestBody UserUpdateRequest request, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return userService.updateUser(userId, request, userDetails.getUser());
     }
 
     // 특정 부모에 대한 학생 리스트
     @GetMapping("/{parentId}/students")
-    public Flux<UserResponse> getStudentsByParentId(@PathVariable UUID parentId) {
-        return userService.findStudentsByParentId(parentId);
+    public Flux<UserResponse> getStudentsByParentId(@PathVariable UUID parentId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return userService.findStudentsByParentId(parentId, userDetails.getUser());
     }
 
     // 특정 학생에 대한 부모 리스트
     @GetMapping("/{studentId}/parents")
-    public Flux<UserResponse> getParentsByStudentId(@PathVariable UUID studentId) {
-        return userService.findParentsByStudentId(studentId);
+    public Flux<UserResponse> getParentsByStudentId(@PathVariable UUID studentId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return userService.findParentsByStudentId(studentId, userDetails.getUser());
     }
 
     @GetMapping("/me")

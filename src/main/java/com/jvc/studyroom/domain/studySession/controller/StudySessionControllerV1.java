@@ -5,9 +5,11 @@ import com.jvc.studyroom.domain.studySession.entity.StudySession;
 import com.jvc.studyroom.domain.studySession.service.StudySessionService;
 import com.jvc.studyroom.domain.user.CurrentUser;
 import com.jvc.studyroom.domain.user.model.User;
+import com.jvc.studyroom.domain.user.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -37,8 +39,8 @@ public class StudySessionControllerV1 {
     }
     // 학습 세션 생성
     @PostMapping("/new")
-    public Mono<StudySessionCreateResponse> createSession(@RequestBody SessionCreateRequest request, @CurrentUser User loginUser) {
-        return service.createSession(request, loginUser);
+    public Mono<StudySessionCreateResponse> createSession(@RequestBody SessionCreateRequest request, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return service.createSession(request, userDetails.getUser());
     }
 
     // 학습 세션 상태 변경 : 시작 | 재개 | 정지 등

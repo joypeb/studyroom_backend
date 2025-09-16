@@ -14,7 +14,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/auth/kakao")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
 public class LoginController {
 
     private final LoginService kakaoLoginService;
